@@ -1,0 +1,48 @@
+ @import "tailwindcss";
+/* Optional subtle animation utility */
+@keyframes fade-in { from {opacity: 0; transform: translateY(8px)} to {opacity: 1; transform: translateY(0)} }
+.animate-fade-in { animation: fade-in .5s ease-out }
+
+/* Add to your global CSS */
+.markdown-content {
+  line-height: 1.6;
+}
+
+.markdown-content h1 {
+  font-size: 2.25rem;
+  font-weight: bold;
+  margin: 1rem 0;
+}
+
+.markdown-content h2 {
+  font-size: 1.875rem;
+  font-weight: bold;
+  margin: 0.75rem 0;
+}
+
+.markdown-content h3 {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0.5rem 0;
+}
+
+.markdown-content p {
+  margin: 0.75rem 0;
+}
+
+.markdown-content strong {
+  font-weight: bold;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+.markdown-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.markdown-content a:hover {
+  color: #1d4ed8;
+}
