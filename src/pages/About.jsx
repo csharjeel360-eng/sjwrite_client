@@ -1,6 +1,6 @@
  import { motion } from 'framer-motion';
 import { useState } from 'react';
-
+import { Helmet } from 'react-helmet-async';
 const About = () => {
   // Sample author data - replace with your actual authors
   const authors = [

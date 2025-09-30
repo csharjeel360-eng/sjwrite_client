@@ -2,7 +2,7 @@
 import TagChips from './TagChips';
 import { api } from '../api/client';
 import { useNavigate } from 'react-router-dom';
-// ...existing code...
+
 // Helper function to convert markdown to plain text for preview
 const markdownToPlainText = (markdown) => {
   if (!markdown) return '';
@@ -38,10 +38,19 @@ const getSafeTags = (tags) => {
   return [];
 };
 
-    
+// Helper function to generate URL-friendly slug
+const generateSlug = (title) => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .trim();
+};
 
 export default function BlogCard({ blog }) {
-   const navigate = useNavigate();
+  const navigate = useNavigate();
 
   const handleTagClick = (tag) => {
     // You can implement tag filtering navigation here
@@ -55,11 +64,14 @@ export default function BlogCard({ blog }) {
     if (plainText.length <= maxLength) return plainText;
     return plainText.substring(0, maxLength) + '...';
   };
-const handleReadMore = async (e) => {
+
+  const handleReadMore = async (e) => {
     e.preventDefault();
     await api.incrementView(blog._id);
-    navigate(`/blog/${blog._id}`);
+    const slug = generateSlug(blog.title);
+    navigate(`/blog/${slug}?id=${blog._id}`);
   };
+
   // Safely get tags from blog object and split multi-word tags
   const tags = getSafeTags(blog.tags);
 
@@ -122,7 +134,7 @@ const handleReadMore = async (e) => {
 
         {/* Title and content */}
         <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
-          <Link to={`/blog/${blog._id}`}>
+          <Link to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`}>
             {blog.title}
           </Link>
         </h3>
@@ -136,7 +148,7 @@ const handleReadMore = async (e) => {
           <TagChips 
             tags={tags} 
             onClick={handleTagClick}
-             maxTags={4}
+            maxTags={4}
             className="mb-4"
           />
         )}
@@ -155,7 +167,7 @@ const handleReadMore = async (e) => {
           </div>
           
           <Link 
-            to={`/blog/${blog._id}`} 
+            to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`} 
             onClick={handleReadMore}
             className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors flex items-center gap-1"
           >

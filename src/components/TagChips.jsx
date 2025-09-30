@@ -1,4 +1,18 @@
- export default function TagChips({ 
+ // In TagChips.js
+import { Link } from 'react-router-dom';
+
+// Helper function to generate URL-friendly slug
+const generateSlug = (title) => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+};
+
+export default function TagChips({ 
   tags = [], 
   onClick, 
   onRemove, 

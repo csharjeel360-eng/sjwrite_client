@@ -1,14 +1,191 @@
  import { motion, AnimatePresence } from 'framer-motion';
 import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
-import BlogList from '../components/BlogList';
-import FeaturedPost from '../components/FeaturedPost';
-import NewsletterSignup from '../components/NewsletterSignup';
 import SearchBar from '../components/SearchBar';
 import SortBar from '../components/SortBar';
 import BlogCard from '../components/BlogCard';
 import { useLocation, useNavigationType } from 'react-router-dom';
 import { Helmet } from "react-helmet";
+
+// Helper function to generate URL-friendly slug
+const generateSlug = (title) => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+};
+
+// Helper function to convert markdown to plain text for preview
+const markdownToPlainText = (markdown) => {
+  if (!markdown) return '';
+  return markdown
+    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/_(.*?)_/g, '$1')
+    .replace(/#{1,6}\s?(.*?)(\n|$)/g, '$1')
+    .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+    .replace(/\n/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+// Featured Post Component
+const FeaturedPost = ({ post, index }) => {
+  const navigate = useNavigate();
+
+  const handleReadMore = async (e) => {
+    e.preventDefault();
+    try {
+      await api.incrementView(post._id);
+    } catch (error) {
+      console.error('Error incrementing view:', error);
+    }
+    const slug = generateSlug(post.title);
+    navigate(`/blog/${slug}?id=${post._id}`);
+  };
+
+  const truncateContent = (content, maxLength = 120) => {
+    const plainText = markdownToPlainText(content);
+    if (plainText.length <= maxLength) return plainText;
+    return plainText.substring(0, maxLength) + '...';
+  };
+
+  const getSafeTags = (tags) => {
+    if (!tags) return [];
+    if (Array.isArray(tags)) {
+      return tags.filter(tag => tag && tag.trim() !== '').slice(0, 2);
+    }
+    return [];
+  };
+
+  const tags = getSafeTags(post.tags);
+
+  return (
+    <motion.article
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      className="group bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100 cursor-pointer"
+      onClick={handleReadMore}
+    >
+      {/* Image */}
+      {post.blogImage && (
+        <div className="relative overflow-hidden h-48">
+          <img
+            src={post.blogImage}
+            alt={post.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          
+          {/* Tags overlay */}
+          {tags.length > 0 && (
+            <div className="absolute bottom-3 left-3 flex flex-wrap gap-1">
+              {tags.map((tag, tagIndex) => (
+                <span
+                  key={tagIndex}
+                  className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-black/70 text-white backdrop-blur-sm"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Content */}
+      <div className="p-6">
+        {/* Author and Date */}
+        <div className="flex items-center gap-3 mb-3">
+          {post.authorImage && (
+            <img
+              src={post.authorImage}
+              alt={post.author}
+              className="w-8 h-8 rounded-full object-cover"
+            />
+          )}
+          <div className="flex-1">
+            <p className="text-sm font-medium text-gray-800">
+              {post.author || 'Admin'}
+            </p>
+            <p className="text-xs text-gray-500">
+              {new Date(post.createdAt).toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+              })}
+            </p>
+          </div>
+        </div>
+
+        {/* Title */}
+        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+          {post.title}
+        </h3>
+
+        {/* Excerpt */}
+        <p className="text-gray-600 mb-4 leading-relaxed line-clamp-3">
+          {truncateContent(post.content)}
+        </p>
+
+        {/* Stats */}
+        <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1">
+              <span className="text-red-500">❤️</span>
+              {post.likes || 0}
+            </span>
+            <span className="flex items-center gap-1">
+              <span className="text-blue-500">💬</span>
+              {post.comments?.length || 0}
+            </span>
+          </div>
+          <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">
+            Featured
+          </span>
+        </div>
+
+        {/* Read More Button */}
+        <div className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors group/btn">
+          Read more
+          <svg 
+            className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" 
+            fill="none" 
+            stroke="currentColor" 
+            viewBox="0 0 24 24"
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </div>
+    </motion.article>
+  );
+};
+
+// Enhanced BlogCard with slug support
+const EnhancedBlogCard = ({ blog }) => {
+  const navigate = useNavigate();
+  
+  const handleReadMore = async (e) => {
+    e.preventDefault();
+    await api.incrementView(blog._id);
+    const slug = generateSlug(blog.title);
+    navigate(`/blog/${slug}?id=${blog._id}`);
+  };
+
+  return (
+    <BlogCard 
+      blog={blog} 
+      onReadMore={handleReadMore}
+      generateSlug={generateSlug}
+    />
+  );
+};
+
 export default function Home() {
   const [featuredPosts, setFeaturedPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
@@ -170,6 +347,10 @@ export default function Home() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
+        <Helmet>
+          <title>Home - SJWrites</title>
+          <meta name="description" content="Discover inspiring blogs at SJWrites covering lifestyle, technology, business, and personal growth." />
+        </Helmet>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse">
             <div className="h-12 bg-gray-200 rounded-lg mb-8"></div>
@@ -193,8 +374,16 @@ export default function Home() {
 
   return (
     <main className="min-h-screen bg-gray-50">
+      <Helmet>
+        <title>SJWrites - Discover Stories That Inspire & Inform</title>
+        <meta name="description" content="Read inspiring blogs at SJWrites covering lifestyle, technology, business, and personal growth. Stay updated with tips, stories, and knowledge." />
+        <meta name="keywords" content="blog, lifestyle, technology, business, personal growth, inspiration, articles" />
+        <meta property="og:title" content="SJWrites - Discover Stories That Inspire & Inform" />
+        <meta property="og:description" content="Read inspiring blogs at SJWrites covering lifestyle, technology, business, and personal growth." />
+        <meta property="og:type" content="website" />
+      </Helmet>
+
       {/* Clear Filter Sticky Tag */}
-       
       <AnimatePresence>
         {showClearFilterTag && (
           <motion.div
@@ -236,15 +425,13 @@ export default function Home() {
             </motion.h1>
              
             <motion.p 
-            
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1, duration: 0.6 }}
               className="mt-6 text-lg md:text-xl text-blue-100 max-w-3xl mx-auto"
             >
-              Read inspiring blogs at SJWrites covering lifestyle, technology, business, and personal growth. Stay updated with tips, stories, and knowledge.
-               
-             </motion.p>
+              Read inspiring blogs at SJWrites covering lifestyle, technology, business, and personal growth. Stay updated with tips, stories, and knowledge.
+            </motion.p>
            
             <motion.div 
               initial={{ opacity: 0, y: 20 }}
@@ -393,13 +580,14 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredPosts.map(post => (
-                <BlogCard key={post._id} blog={post} />
+                <EnhancedBlogCard key={post._id} blog={post} />
               ))}
             </div>
           )}
         </div>
       </section>
 
+      {/* Newsletter Section */}
       <section id="newsletter" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 shadow-xl">
@@ -490,7 +678,6 @@ export default function Home() {
           </div>
         </section>
       )}
-       
     </main>
   );
 }
