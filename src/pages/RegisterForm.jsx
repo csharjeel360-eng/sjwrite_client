@@ -82,7 +82,7 @@ const RegisterForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-white to-gray-100 py-8 px-4">
       <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 w-full max-w-md">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold text-gray-800">Create Admin Account</h2>
@@ -121,7 +121,7 @@ const RegisterForm = () => {
               className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:outline-none transition-colors ${
                 validationErrors.username 
                   ? 'border-red-500 focus:ring-red-200' 
-                  : 'border-gray-300 focus:ring-blue-200 focus:border-blue-500'
+                    : 'border-gray-300 focus:ring-gray-300 focus:border-black'
               }`}
               placeholder="Enter your username"
             />
@@ -143,7 +143,7 @@ const RegisterForm = () => {
               className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:outline-none transition-colors ${
                 validationErrors.password 
                   ? 'border-red-500 focus:ring-red-200' 
-                  : 'border-gray-300 focus:ring-blue-200 focus:border-blue-500'
+                    : 'border-gray-300 focus:ring-gray-300 focus:border-black'
               }`}
               placeholder="Enter your password"
             />
@@ -165,7 +165,7 @@ const RegisterForm = () => {
               className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:outline-none transition-colors ${
                 validationErrors.confirmPassword 
                   ? 'border-red-500 focus:ring-red-200' 
-                  : 'border-gray-300 focus:ring-blue-200 focus:border-blue-500'
+                    : 'border-gray-300 focus:ring-gray-300 focus:border-black'
               }`}
               placeholder="Confirm your password"
             />
@@ -179,8 +179,8 @@ const RegisterForm = () => {
             disabled={isLoading}
             className={`w-full py-3 px-4 rounded-lg text-white font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors ${
               isLoading 
-                ? 'bg-blue-400 cursor-not-allowed' 
-                : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-black hover:bg-gray-800 focus:ring-black'
             }`}
           >
             {isLoading ? (

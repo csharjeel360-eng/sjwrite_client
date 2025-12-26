@@ -39,10 +39,10 @@
 }
 
 .markdown-content a {
-  color: #2563eb;
+  color: #000000;
   text-decoration: underline;
 }
 
 .markdown-content a:hover {
-  color: #1d4ed8;
+  color: #111827;
 }

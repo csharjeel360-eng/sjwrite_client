@@ -13,7 +13,7 @@ const renderMarkdownPreview = (text) => {
     .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
     .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
     .replace(/_(.*?)_/g, '<em class="italic">$1</em>')
-    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-black hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
     .replace(/\n\n/g, '</p><p>')
     .replace(/\n/g, '<br />')
     .replace(/<p>(.*?)<\/p>/g, '<p class="mb-4 leading-relaxed">$1</p>')
@@ -61,7 +61,7 @@ export default function FeaturedPost({ post, index }) {
             alt={post.title}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          <div className="absolute top-4 left-4 bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
+          <div className="absolute top-4 left-4 bg-black text-white px-3 py-1 rounded-full text-sm font-medium">
             Featured
           </div>
         </div>
@@ -74,7 +74,7 @@ export default function FeaturedPost({ post, index }) {
           <span>{Math.ceil(post.content.split(' ').length / 200)} min read</span>
         </div>
         
-        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-black transition-colors">
           <Link to={`/blog/${post._id}`}>
             {post.title}
           </Link>
@@ -89,7 +89,7 @@ export default function FeaturedPost({ post, index }) {
         
         <Link 
           to={`/blog/${post._id}`}
-          className="inline-flex items-center text-blue-600 font-medium hover:text-blue-700 transition-colors group/readmore"
+          className="inline-flex items-center text-black font-medium hover:text-gray-800 transition-colors group/readmore"
         >
           Read more
           <svg className="w-4 h-4 ml-1 transition-transform group-hover/readmore:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">

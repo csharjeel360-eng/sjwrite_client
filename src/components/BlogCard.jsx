@@ -133,7 +133,7 @@ export default function BlogCard({ blog }) {
         </div>
 
         {/* Title and content */}
-        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:text-blue-600 transition-colors">
+        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:text-black transition-colors">
           <Link to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`}>
             {blog.title}
           </Link>
@@ -161,7 +161,7 @@ export default function BlogCard({ blog }) {
               {blog.likes || 0} likes
             </span>
             <span className="flex items-center gap-1">
-              <span className="text-blue-500">💬</span>
+              <span className="text-black">💬</span>
               {blog.comments?.length || 0} comments
             </span>
           </div>
@@ -169,7 +169,7 @@ export default function BlogCard({ blog }) {
           <Link 
             to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`} 
             onClick={handleReadMore}
-            className="text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors flex items-center gap-1"
+            className="text-black hover:text-gray-800 font-medium text-sm transition-colors flex items-center gap-1"
           >
             Read more
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -97,10 +97,10 @@ export default function Navbar() {
             {/* Animated Logo */}
             <Link 
               to="/" 
-              className="text-2xl font-bold text-blue-600 flex items-center min-h-[2rem]"
+              className="text-2xl font-bold text-black flex items-center min-h-[2rem]"
             >
               {logoText}
-              <span className={`ml-0.5 bg-blue-600 h-6 w-0.5 ${isTyping ? 'animate-pulse' : 'opacity-0'}`}></span>
+              <span className={`ml-0.5 bg-black h-6 w-0.5 ${isTyping ? 'animate-pulse' : 'opacity-0'}`}></span>
             </Link>
 
             {/* Desktop Navigation - Left Side */}
@@ -108,7 +108,7 @@ export default function Navbar() {
               <NavLink 
                 to="/" 
                 className={({isActive}) => 
-                  isActive ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
+                  isActive ? 'text-black font-medium' : 'text-gray-700 hover:text-black'
                 }
               >
                 Home
@@ -117,7 +117,7 @@ export default function Navbar() {
               <NavLink 
                 to="/blogs" 
                 className={({isActive}) => 
-                  isActive ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
+                  isActive ? 'text-black font-medium' : 'text-gray-700 hover:text-black'
                 }
               >
                 Blogs
@@ -126,7 +126,7 @@ export default function Navbar() {
               <NavLink 
                 to="/about" 
                 className={({isActive}) => 
-                  isActive ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
+                  isActive ? 'text-black font-medium' : 'text-gray-700 hover:text-black'
                 }
               >
                 About Us
@@ -138,7 +138,7 @@ export default function Navbar() {
                   <NavLink 
                     to="/admin/dashboard" 
                     className={({isActive}) => 
-                      isActive ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
+                      isActive ? 'text-black font-medium' : 'text-gray-700 hover:text-black'
                     }
                   >
                     Dashboard
@@ -147,7 +147,7 @@ export default function Navbar() {
                   <NavLink 
                     to="/admin/registeration" 
                     className={({isActive}) => 
-                      isActive ? 'text-blue-600 font-medium' : 'text-gray-700 hover:text-blue-600'
+                      isActive ? 'text-black font-medium' : 'text-gray-700 hover:text-black'
                     }
                   >
                     Add new admin
@@ -174,7 +174,7 @@ export default function Navbar() {
                   <div className="relative">
                     <button 
                       onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center justify-center w-10 h-10 rounded-full bg-blue-100 text-blue-600 hover:bg-blue-200 transition"
+                      className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
@@ -233,7 +233,7 @@ export default function Navbar() {
                       </div>
                       <Link 
                         to="/admin/login" 
-                        className="block px-4 py-2 text-sm text-blue-600 hover:bg-gray-100"
+                        className="block px-4 py-2 text-sm text-black hover:bg-gray-100"
                         onClick={() => setIsUserMenuOpen(false)}
                       >
                         Admin Login
@@ -246,7 +246,7 @@ export default function Navbar() {
 
             {/* Mobile menu button */}
             <button 
-              className="md:hidden p-2 rounded-md text-gray-700 hover:text-blue-600 focus:outline-none"
+              className="md:hidden p-2 rounded-md text-gray-700 hover:text-black focus:outline-none"
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               <svg 

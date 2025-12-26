@@ -123,7 +123,7 @@ const FeaturedPost = ({ post, index }) => {
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-black transition-colors">
           {post.title}
         </h3>
 
@@ -140,17 +140,17 @@ const FeaturedPost = ({ post, index }) => {
               {post.likes || 0}
             </span>
             <span className="flex items-center gap-1">
-              <span className="text-blue-500">💬</span>
+              <span className="text-black">💬</span>
               {post.comments?.length || 0}
             </span>
           </div>
-          <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full">
+          <span className="text-xs bg-gray-50 text-black px-2 py-1 rounded-full">
             Featured
           </span>
         </div>
 
         {/* Read More Button */}
-        <div className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium text-sm transition-colors group/btn">
+        <div className="inline-flex items-center gap-2 text-black hover:text-gray-800 font-medium text-sm transition-colors group/btn">
           Read more
           <svg 
             className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" 
@@ -398,7 +398,7 @@ export default function Home() {
             </span>
             <button
               onClick={clearFilters}
-              className="text-blue-600 hover:text-blue-800 font-semibold text-sm flex items-center"
+              className="text-black hover:text-gray-800 font-semibold text-sm flex items-center"
             >
               Clear all
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -409,59 +409,7 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black/20"></div>
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-24">
-          <div className="text-center">
-            <motion.h1 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="text-4xl md:text-6xl font-bold tracking-tight leading-tight"
-            >
-              Discover Stories That
-              <span className="block text-blue-200">Inspire & Inform</span>
-            </motion.h1>
-             
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1, duration: 0.6 }}
-              className="mt-6 text-lg md:text-xl text-blue-100 max-w-3xl mx-auto"
-            >
-              Read inspiring blogs at SJWrites covering lifestyle, technology, business, and personal growth. Stay updated with tips, stories, and knowledge.
-            </motion.p>
-           
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.6 }}
-              className="mt-8 flex flex-col sm:flex-row gap-4 justify-center"
-            >
-              <a 
-                href="#explore" 
-                className="px-8 py-3 bg-white text-blue-600 font-semibold rounded-lg hover:bg-gray-100 transition-colors shadow-lg"
-              >
-                Explore Articles
-              </a>
-              <a 
-                href="#newsletter" 
-                className="px-8 py-3 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-blue-600 transition-colors"
-              >
-                Join Newsletter
-              </a>
-            </motion.div>
-          </div>
-        </div>
-        
-        {/* Wave divider */}
-        <div className="absolute bottom-0 left-0 w-full">
-          <svg className="w-full h-12 text-gray-50" viewBox="0 0 1200 120" preserveAspectRatio="none">
-            <path d="M1200 120L0 16.48 0 0 1200 0 1200 120z" fill="currentColor"></path>
-          </svg>
-        </div>
-      </section>
+      {/* Hero removed: simplified header - start directly at Search/Sort */}
 
       {/* Search and Sort Section */}
       <section className="py-8 bg-white">
@@ -486,7 +434,7 @@ export default function Home() {
                   </p>
                   <button
                     onClick={clearFilters}
-                    className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                    className="text-sm text-black hover:text-gray-800 font-medium"
                   >
                     Clear filters
                   </button>
@@ -521,7 +469,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
               <div>
-                <div className="text-3xl md:text-4xl font-bold text-blue-400">{allPosts.length}+</div>
+                <div className="text-3xl md:text-4xl font-bold text-white">{allPosts.length}+</div>
                 <div className="text-sm md:text-base text-gray-300 mt-2">Articles Published</div>
               </div>
               <div>
@@ -572,7 +520,7 @@ export default function Home() {
               <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+                className="px-4 py-2 bg-black text-white font-medium rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-colors"
               >
                 Clear Filters
               </button>
@@ -590,11 +538,11 @@ export default function Home() {
       {/* Newsletter Section */}
       <section id="newsletter" className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-2xl p-8 md:p-12 shadow-xl">
+          <div className="bg-gradient-to-r from-black to-gray-700 rounded-2xl p-8 md:p-12 shadow-xl">
             <div className="flex flex-col md:flex-row items-center justify-between">
               <div className="flex-1 mb-8 md:mb-0 md:mr-8">
                 <h2 className="text-3xl font-bold text-white mb-4">Stay in the loop</h2>
-                <p className="text-blue-100 text-lg">
+                <p className="text-gray-300 text-lg">
                   Subscribe to our newsletter for the latest articles, updates, and exclusive content.
                 </p>
               </div>
@@ -613,7 +561,7 @@ export default function Home() {
                       id="email"
                       required
                       placeholder="Enter your email"
-                      className="w-full px-5 py-3 rounded-lg border border-transparent text-base focus:ring-2 focus:ring-white focus:border-transparent bg-white/10 placeholder-blue-200 text-white"
+                      className="w-full px-5 py-3 rounded-lg border border-transparent text-base focus:ring-2 focus:ring-white focus:border-transparent bg-white/10 placeholder-gray-300 text-white"
                     />
                   </div>
                   
@@ -621,12 +569,12 @@ export default function Home() {
                   
                   <button
                     type="submit"
-                    className="w-full px-6 py-3 bg-white text-blue-600 font-medium rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                    className="w-full px-6 py-3 bg-white text-black font-medium rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
                   >
                     Subscribe Now
                   </button>
                   
-                  <p className="text-blue-200 text-sm text-center">
+                  <p className="text-gray-300 text-sm text-center">
                     We respect your privacy. Unsubscribe at any time.
                   </p>
                 </form>
@@ -662,10 +610,10 @@ export default function Home() {
                     className="group bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow border border-gray-100 cursor-pointer"
                     onClick={() => handleCategorySelect(category)}
                   >
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-blue-200 transition-colors">
+                    <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center mb-4 group-hover:bg-gray-200 transition-colors">
                       <span className="text-2xl">📝</span>
                     </div>
-                    <h3 className="font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">
+                    <h3 className="font-semibold text-gray-900 group-hover:text-black transition-colors">
                       {category}
                     </h3>
                     <p className="text-sm text-gray-600 mt-2">

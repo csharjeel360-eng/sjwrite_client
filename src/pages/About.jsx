@@ -163,7 +163,7 @@ const About = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
+      <section className="relative bg-gradient-to-br from-black to-purple-700 text-white py-20">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h1 
@@ -220,22 +220,22 @@ const About = () => {
               viewport={{ once: true }}
               className="relative"
             >
-              <div className="bg-blue-100 rounded-2xl p-6 shadow-lg">
+              <div className="bg-gray-100 rounded-2xl p-6 shadow-lg">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-                    <div className="text-3xl font-bold text-blue-600">50+</div>
+                    <div className="text-3xl font-bold text-black">50+</div>
                     <div className="text-gray-600">Articles Published</div>
                   </div>
                   <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-                    <div className="text-3xl font-bold text-blue-600">5+</div>
+                    <div className="text-3xl font-bold text-black">5+</div>
                     <div className="text-gray-600">Expert Writers</div>
                   </div>
                   <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-                    <div className="text-3xl font-bold text-blue-600">1M+</div>
+                    <div className="text-3xl font-bold text-black">1M+</div>
                     <div className="text-gray-600">Monthly Readers</div>
                   </div>
                   <div className="bg-white rounded-xl p-4 text-center shadow-sm">
-                    <div className="text-3xl font-bold text-blue-600">15+</div>
+                    <div className="text-3xl font-bold text-black">15+</div>
                     <div className="text-gray-600">Content Categories</div>
                   </div>
                 </div>
@@ -275,8 +275,8 @@ const About = () => {
               viewport={{ once: true }}
               className="bg-white p-6 rounded-xl shadow-sm"
             >
-              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-14 h-14 bg-gray-100 rounded-xl flex items-center justify-center mb-4 mx-auto">
+                <svg className="w-8 h-8 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
                 </svg>
               </div>
@@ -357,23 +357,23 @@ const About = () => {
                 className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
               >
                 <div className="h-48 bg-gray-100 flex items-center justify-center">
-                  <div className={`rounded-full p-4 ${author.gender === 'female' ? 'bg-pink-100 text-pink-600' : 'bg-blue-100 text-blue-600'}`}>
+                  <div className={`rounded-full p-4 ${author.gender === 'female' ? 'bg-pink-100 text-pink-600' : 'bg-gray-100 text-black'}`}>
                     <GenderIcon gender={author.gender} className="w-24 h-24" />
                   </div>
                 </div>
                 <div className="p-6">
                   <h3 className="text-xl font-semibold text-gray-900 mb-1">{author.name}</h3>
-                  <p className="text-blue-600 font-medium mb-3">{author.role}</p>
+                    <p className="text-black font-medium mb-3">{author.role}</p>
                   <p className="text-gray-600 text-sm mb-4">{author.bio}</p>
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-500">{author.articles} articles</span>
                     <div className="flex space-x-3">
-                      <a href={author.social.twitter} className="text-gray-400 hover:text-blue-500">
+                      <a href={author.social.twitter} className="text-gray-400 hover:text-gray-800">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84"></path>
                         </svg>
                       </a>
-                      <a href={author.social.linkedin} className="text-gray-400 hover:text-blue-700">
+                      <a href={author.social.linkedin} className="text-gray-400 hover:text-gray-800">
                         <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
                         </svg>
@@ -388,7 +388,7 @@ const About = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-16 bg-gradient-to-r from-blue-600 to-purple-700 text-white">
+      <section className="py-16 bg-gradient-to-r from-black to-purple-700 text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h2 
             initial={{ opacity: 0, y: 20 }}
@@ -420,7 +420,7 @@ const About = () => {
                 setShowNewsletterForm(true);
                 setFormError('');
               }}
-              className="bg-white text-blue-600 font-semibold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors"
+              className="bg-white text-black font-semibold py-3 px-8 rounded-lg hover:bg-gray-100 transition-colors"
             >
               Subscribe to Newsletter
             </button>
@@ -486,7 +486,7 @@ const About = () => {
                       name="email"
                       id="email"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -496,7 +496,7 @@ const About = () => {
                   
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="w-full bg-black text-white font-medium py-3 rounded-lg hover:bg-gray-800 transition-colors"
                   >
                     Subscribe Now
                   </button>
@@ -561,7 +561,7 @@ const About = () => {
                         name="firstName"
                         id="firstName"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                         placeholder="John"
                       />
                     </div>
@@ -574,7 +574,7 @@ const About = () => {
                         name="lastName"
                         id="lastName"
                         required
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                         placeholder="Doe"
                       />
                     </div>
@@ -589,7 +589,7 @@ const About = () => {
                       name="email"
                       id="writerEmail"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                       placeholder="your@email.com"
                     />
                   </div>
@@ -603,7 +603,7 @@ const About = () => {
                       name="expertise"
                       id="expertise"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                       placeholder="Technology, Design, Business, etc."
                     />
                   </div>
@@ -616,7 +616,7 @@ const About = () => {
                       name="experience"
                       id="experience"
                       required
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                     >
                       <option value="">Select your experience level</option>
                       <option value="beginner">Beginner (0-1 years)</option>
@@ -634,7 +634,7 @@ const About = () => {
                       type="url"
                       name="portfolio"
                       id="portfolio"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                       placeholder="https://yourportfolio.com"
                     />
                   </div>
@@ -648,7 +648,7 @@ const About = () => {
                       id="message"
                       required
                       rows={4}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                       placeholder="Tell us about your writing experience and why you're interested in joining our platform..."
                     ></textarea>
                   </div>
@@ -658,7 +658,7 @@ const About = () => {
                   
                   <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg hover:bg-blue-700 transition-colors"
+                    className="w-full bg-black text-white font-medium py-3 rounded-lg hover:bg-gray-800 transition-colors"
                   >
                     Submit Application
                   </button>

@@ -30,7 +30,7 @@ export default function CommentSection({ blogId, comments=[], onAdded }) {
       <div className="mt-4 space-y-2">
         <input className="w-full border rounded px-3 py-2" placeholder="Your name (optional)" value={username} onChange={(e)=>setUsername(e.target.value)} />
         <textarea className="w-full border rounded px-3 py-2" rows="3" placeholder="Write a comment..." value={text} onChange={(e)=>setText(e.target.value)} />
-        <button onClick={submit} disabled={loading} className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50">
+        <button onClick={submit} disabled={loading} className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800 disabled:opacity-50">
           {loading ? 'Posting...' : 'Post comment'}
         </button>
       </div>

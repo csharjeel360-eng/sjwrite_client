@@ -27,7 +27,7 @@ export default function SearchBar({ onSearch, placeholder = "Search blogs...", c
         <div className="relative flex-grow">
           <input
             type="text"
-            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all sm:rounded-r-none"
+            className="w-full pl-10 pr-10 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent outline-none transition-all sm:rounded-r-none"
             placeholder={placeholder}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
@@ -51,7 +51,7 @@ export default function SearchBar({ onSearch, placeholder = "Search blogs...", c
         {/* Search Button */}
         <button
           type="submit"
-          className="px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors sm:rounded-l-none"
+          className="px-4 py-3 bg-black text-white rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 transition-colors sm:rounded-l-none"
         >
           Search
         </button>

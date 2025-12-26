@@ -106,7 +106,7 @@ function RichTextEditor({ value, onChange, placeholder }) {
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
       .replace(/_(.*?)_/g, '<em>$1</em>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
+      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-black hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
       .replace(/\n/g, '<br />');
     
     return <div dangerouslySetInnerHTML={{ __html: html }} />;
@@ -151,7 +151,7 @@ function RichTextEditor({ value, onChange, placeholder }) {
         <button
           type="button"
           onClick={() => applyFormat('link')}
-          className="px-2 py-1 rounded hover:bg-gray-200 text-blue-600"
+          className="px-2 py-1 rounded hover:bg-gray-200 text-black"
           title="Add Link"
         >
           🔗
@@ -181,7 +181,7 @@ function RichTextEditor({ value, onChange, placeholder }) {
             <button
               type="button"
               onClick={() => applyFormat('applyLink')}
-              className="px-2 py-1 bg-blue-600 text-white rounded text-sm"
+              className="px-2 py-1 bg-black text-white rounded text-sm"
               disabled={!linkUrl}
             >
               Apply Link
@@ -425,7 +425,7 @@ function DashboardInner() {
                 <div className="flex gap-2">
                   <button
                     onClick={() => edit(b)}
-                    className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                    className="px-4 py-2 rounded bg-black text-white hover:bg-gray-800 transition"
                   >
                     Edit
                   </button>

@@ -1,4 +1,4 @@
- import { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams, useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api/client';
 import CommentSection from '../components/CommentSection';
@@ -31,13 +31,13 @@ const generateSlug = (title) => {
   if (!title) return '';
   return title
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
+    .replace(/[^\w\s-]/g, '') // Remove special characters
+    .replace(/\s+/g, '-')     // Replace spaces with hyphens
+    .replace(/--+/g, '-')     // Replace multiple hyphens with single hyphen
     .trim();
 };
 
-// Enhanced Markdown renderer with better parsing
+// Markdown Renderer Component
 function MarkdownRenderer({ content, onHeadingsUpdate }) {
   const [htmlContent, setHtmlContent] = useState('');
 
@@ -69,13 +69,13 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
         .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
         .replace(/_(.*?)_/g, '<em class="italic">$1</em>')
         .replace(/~~(.*?)~~/g, '<del class="line-through">$1</del>')
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-black hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br />')
         .replace(/<p>(.*?)<\/p>/g, '<p class="mb-4 leading-relaxed text-gray-700">$1</p>')
         .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4 border"><code class="block whitespace-pre">$2</code></pre>')
         .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono border">$1</code>')
-        .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-blue-500 pl-4 py-2 my-4 bg-blue-50 italic">$1</blockquote>');
+        .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 py-2 my-4 bg-gray-50 italic">$1</blockquote>');
 
       // Notify parent component about headings
       if (onHeadingsUpdate) {
@@ -116,7 +116,7 @@ function ReadingProgress() {
   return (
     <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
       <div 
-        className="h-full bg-blue-600 transition-all duration-150"
+        className="h-full bg-black transition-all duration-150"
         style={{ width: `${progress}%` }}
       />
     </div>
@@ -351,7 +351,7 @@ export default function BlogDetail() {
     return (
       <div className="max-w-3xl mx-auto px-4 py-10 text-center">
         <h2 className="text-2xl font-bold text-gray-800 mb-4">Blog post not found</h2>
-        <Link to="/blogs" className="text-blue-600 hover:underline">
+        <Link to="/blogs" className="text-black hover:underline">
           ← Back to all blogs
         </Link>
       </div>
@@ -373,7 +373,7 @@ export default function BlogDetail() {
                   onClick={() => {
                     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(blog.title)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
                   }}
-                  className="p-3 bg-blue-500 text-white rounded-full hover:bg-blue-600 transition-colors"
+                  className="p-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z"/>
@@ -383,7 +383,7 @@ export default function BlogDetail() {
                   onClick={() => {
                     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(window.location.href)}`, '_blank');
                   }}
-                  className="p-3 bg-blue-800 text-white rounded-full hover:bg-blue-900 transition-colors"
+                  className="p-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z"/>
@@ -393,7 +393,7 @@ export default function BlogDetail() {
                   onClick={() => {
                     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(window.location.href)}`, '_blank');
                   }}
-                  className="p-3 bg-blue-700 text-white rounded-full hover:bg-blue-800 transition-colors"
+                  className="p-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
                 >
                   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-5.052 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z"/>
@@ -438,7 +438,7 @@ export default function BlogDetail() {
                       <a
                         key={index}
                         href={`#${heading.id}`}
-                        className={`block py-1 text-gray-600 hover:text-blue-600 transition-colors text-sm ${
+                        className={`block py-1 text-gray-600 hover:text-black transition-colors text-sm ${
                           heading.level === 2 ? 'pl-4' : heading.level === 3 ? 'pl-8' : ''
                         }`}
                       >
@@ -455,9 +455,9 @@ export default function BlogDetail() {
           <main className={`${headings.length > 0 ? 'lg:flex-1' : 'max-w-3xl mx-auto'} mb-12`}>
             {/* Breadcrumb */}
             <nav className="text-sm text-gray-500 mb-6">
-              <Link to="/" className="hover:text-blue-600">Home</Link>
+              <Link to="/" className="hover:text-black">Home</Link>
               <span className="mx-2">/</span>
-              <Link to="/blogs" className="hover:text-blue-600">Blogs</Link>
+              <Link to="/blogs" className="hover:text-black">Blogs</Link>
               <span className="mx-2">/</span>
               <span className="text-gray-800 line-clamp-1">{blog.title}</span>
             </nav>
@@ -592,7 +592,7 @@ export default function BlogDetail() {
 
               <button
                 onClick={shareBlog}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-50 text-black hover:bg-gray-100 transition-colors"
               >
                 <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
                   <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
@@ -655,7 +655,7 @@ export default function BlogDetail() {
             <div className="flex justify-between items-center mt-12 pt-6 border-t">
               <Link 
                 to="/blogs" 
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors"
+                className="inline-flex items-center gap-2 text-black hover:text-gray-800 font-medium transition-colors"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
@@ -676,7 +676,7 @@ export default function BlogDetail() {
               
               <Link 
                 to="/blogs" 
-                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 font-medium transition-colors group"
+                className="inline-flex items-center gap-2 text-black hover:text-gray-800 font-medium transition-colors group"
               >
                 View all blogs
                 <svg className="w-5 h-5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -706,22 +706,38 @@ export default function BlogDetail() {
         )}
 
         {/* Newsletter Subscription */}
-        <section className="mt-16 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-8 text-center">
-          <h3 className="text-2xl font-bold text-gray-900 mb-4">
+        <section className="mt-16 bg-gradient-to-r from-white to-gray-50 rounded-2xl px-4 py-8 sm:p-8 text-center flex flex-col items-center">
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">
             Stay updated with our latest blogs
           </h3>
-          <p className="text-gray-600 mb-6 max-w-md mx-auto">
+          <p className="text-gray-600 mb-5 sm:mb-6 max-w-md mx-auto text-base sm:text-lg">
             Get the latest posts delivered right to your inbox. No spam ever.
           </p>
-          <div className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
-            <input 
-              type="email" 
-              placeholder="Enter your email"
-              className="flex-1 px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-            <button className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
-              Subscribe
-            </button>
+          <div className="w-full max-w-md bg-black p-4 sm:p-6 rounded-lg shadow-lg flex flex-col items-center">
+            <form 
+              action="https://formspree.io/f/mjkezqby"
+              method="POST"
+              className="w-full space-y-3 sm:space-y-4"
+            >
+              <div>
+                <label htmlFor="email" className="sr-only">Email address</label>
+                <input
+                  type="email"
+                  name="email"
+                  id="email"
+                  required
+                  placeholder="Enter your email"
+                  className="w-full px-4 py-2 sm:px-5 sm:py-3 rounded-lg border border-transparent text-base focus:ring-2 focus:ring-white focus:border-transparent bg-white/10 placeholder-gray-300 text-white"
+                />
+              </div>
+              <input type="hidden" name="_subject" value="New newsletter subscription" />
+              <button
+                type="submit"
+                className="w-full px-4 py-2 sm:px-6 sm:py-3 bg-white text-black font-medium rounded-lg hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-black"
+              >
+                Subscribe Now
+              </button>
+            </form>
           </div>
         </section>
       </div>

@@ -183,7 +183,7 @@ export default function BlogList() {
           <p className="text-gray-600 mb-4">{error}</p>
           <button
             onClick={load}
-            className="px-5 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            className="px-5 py-2.5 bg-black text-white font-medium rounded-lg hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-colors"
           >
             Try Again
           </button>
@@ -212,7 +212,7 @@ export default function BlogList() {
               {(searchQuery || activeFilter !== 'all') && (
                 <button
                   onClick={clearFilters}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-sm text-black hover:text-gray-800 font-medium"
                 >
                   Clear filters
                 </button>
@@ -248,7 +248,7 @@ export default function BlogList() {
           <p className="text-gray-600 mb-4">Try adjusting your search or filters</p>
           <button
             onClick={clearFilters}
-            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors"
+            className="px-4 py-2 bg-black text-white font-medium rounded-md hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-black transition-colors"
           >
             Clear Filters
           </button>

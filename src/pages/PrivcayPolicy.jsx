@@ -23,7 +23,7 @@ const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 to-purple-700 text-white py-20">
+      <section className="relative bg-gradient-to-br from-black to-purple-700 text-white py-20">
         <div className="absolute inset-0 bg-black/20"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.h1 
