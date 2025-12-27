@@ -1,69 +1,20 @@
- import { Link } from 'react-router-dom';
-import TagChips from './TagChips';
+import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import { useNavigate } from 'react-router-dom';
-
-// Helper function to convert markdown to plain text for preview
-const markdownToPlainText = (markdown) => {
-  if (!markdown) return '';
-  
-  return markdown
-    .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
-    .replace(/_(.*?)_/g, '$1') // Remove italic
-    .replace(/#{1,6}\s?(.*?)(\n|$)/g, '$1') // Remove headers
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove link markup, keep text
-    .replace(/\n/g, ' ') // Replace newlines with spaces
-    .replace(/\s+/g, ' ') // Collapse multiple spaces
-    .trim();
-};
-
-// Helper function to safely handle tags and split multi-word tags
-const getSafeTags = (tags) => {
-  if (!tags) return [];
-  if (Array.isArray(tags)) {
-    return tags
-      .filter(tag => tag && tag.trim() !== '')
-      .flatMap(tag => tag.split(/\s+/)) // Split on any whitespace
-      .filter(tag => tag !== '');
-  }
-  if (typeof tags === 'string') {
-    // Handle case where tags might be stored as comma-separated string
-    return tags
-      .split(',')
-      .map(tag => tag.trim())
-      .filter(tag => tag !== '')
-      .flatMap(tag => tag.split(/\s+/)) // Split on any whitespace
-      .filter(tag => tag !== '');
-  }
-  return [];
-};
 
 // Helper function to generate URL-friendly slug
 const generateSlug = (title) => {
   if (!title) return '';
   return title
     .toLowerCase()
-    .replace(/[^\w\s-]/g, '') // Remove special characters
-    .replace(/\s+/g, '-') // Replace spaces with hyphens
-    .replace(/-+/g, '-') // Replace multiple hyphens with single
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
     .trim();
 };
 
-export default function BlogCard({ blog }) {
+export default function BlogCard({ blog, size = 'normal', showExcerpt = true }) {
   const navigate = useNavigate();
-
-  const handleTagClick = (tag) => {
-    // You can implement tag filtering navigation here
-    console.log('Tag clicked:', tag);
-    // Example: navigate to tag page or filter by tag
-    // navigate(`/blogs?tag=${tag}`);
-  };
-
-  const truncateContent = (content, maxLength = 150) => {
-    const plainText = markdownToPlainText(content);
-    if (plainText.length <= maxLength) return plainText;
-    return plainText.substring(0, maxLength) + '...';
-  };
 
   const handleReadMore = async (e) => {
     e.preventDefault();
@@ -72,111 +23,168 @@ export default function BlogCard({ blog }) {
     navigate(`/blog/${slug}?id=${blog._id}`);
   };
 
-  // Safely get tags from blog object and split multi-word tags
-  const tags = getSafeTags(blog.tags);
+  const formatDate = (date) => {
+    const now = new Date();
+    const postDate = new Date(date);
+    const diffTime = Math.abs(now - postDate);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 0) return 'Today';
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays < 7) return `${diffDays} days ago`;
+    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
+    return `${Math.floor(diffDays / 365)} years ago`;
+  };
+
+  const getCategoryDisplay = (categories) => {
+    if (!categories || !Array.isArray(categories)) return null;
+    return categories.slice(0, 2).map((cat, idx) => (
+      <a 
+        key={idx} 
+        href={`/category/${cat.toLowerCase().replace(/\s+/g, '-')}`}
+        className="entry-category entry-category-item"
+      >
+        {cat}
+      </a>
+    ));
+  };
+
+  const getImageSize = () => {
+    switch(size) {
+      case 'large':
+        return 'h-96';
+      case 'medium':
+        return 'h-64';
+      case 'small':
+        return 'h-48';
+      default:
+        return 'h-56';
+    }
+  };
+
+  const getTitleSize = () => {
+    switch(size) {
+      case 'large':
+        return 'text-2xl md:text-3xl';
+      case 'medium':
+        return 'text-xl';
+      case 'small':
+        return 'text-lg';
+      default:
+        return 'text-xl';
+    }
+  };
+
+  const truncateContent = (content, maxLength = 120) => {
+    if (!content) return '';
+    const plainText = content.replace(/<[^>]*>/g, '');
+    if (plainText.length <= maxLength) return plainText;
+    return plainText.substring(0, maxLength) + '...';
+  };
 
   return (
-    <article className="bg-white rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden animate-fade-in">
-      {blog.blogImage && (
-        <div className="relative overflow-hidden">
-          <img 
-            src={blog.blogImage} 
-            alt={blog.title} 
-            className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105" 
-          />
-          
-          {/* Tags displayed at the bottom of the image */}
-          {tags.length > 0 && (
-            <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-2">
-              {tags.slice(0, 4).map((tag, index) => (
-                <span
-                  key={index}
-                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-black/70 text-white backdrop-blur-sm cursor-pointer hover:bg-black/80 transition-colors"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleTagClick(tag);
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-              {tags.length > 4 && (
-                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-black/70 text-white backdrop-blur-sm">
-                  +{tags.length - 4} more
-                </span>
+    <article className={`entry-tpl-tile ${size === 'large' ? 'entry-tpl-tile-xl' : ''} g1-dark`}>
+      {/* Featured Image */}
+      <div className="entry-featured-media">
+        <Link 
+          to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`} 
+          className="g1-frame"
+          onClick={handleReadMore}
+        >
+          <div className="g1-frame-inner">
+            {blog.blogImage && (
+              <img
+                src={blog.blogImage}
+                alt={blog.title}
+                className={`w-full ${getImageSize()} object-cover lazyloaded`}
+                loading="lazy"
+              />
+            )}
+            <span className="g1-frame-icon"></span>
+          </div>
+        </Link>
+      </div>
+
+      {/* Content */}
+      <div className="entry-body p-4 bg-white">
+        {/* Categories */}
+        <header className="entry-header">
+          <div className="entry-before-title mb-2">
+            <span className="entry-categories">
+              <span className="entry-categories-inner">
+                <span className="entry-categories-label text-sm text-gray-500">in</span>
+                {getCategoryDisplay(blog.tags)}
+                {blog.tags && blog.tags.length > 2 && (
+                  <span className="text-sm text-gray-500 ml-1">+{blog.tags.length - 2} more</span>
+                )}
+              </span>
+            </span>
+          </div>
+
+          {/* Title */}
+          <h3 className={`${getTitleSize()} font-bold entry-title mb-3`}>
+            <Link 
+              to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`}
+              className="text-gray-900 hover:text-black"
+              onClick={handleReadMore}
+            >
+              {blog.title}
+            </Link>
+          </h3>
+
+          {/* Excerpt - Only show for medium/large cards */}
+          {showExcerpt && (size === 'large' || size === 'medium') && blog.content && (
+            <p className="text-gray-600 mb-4 line-clamp-3">
+              {truncateContent(blog.content, size === 'large' ? 200 : 150)}
+            </p>
+          )}
+
+          {/* Author and Date - Only for large cards */}
+          {size === 'large' && (
+            <div className="flex items-center mb-4">
+              {blog.authorImage && (
+                <img 
+                  src={blog.authorImage} 
+                  alt={blog.author}
+                  className="w-8 h-8 rounded-full mr-3"
+                />
               )}
+              <div>
+                <p className="text-sm font-medium text-gray-800">{blog.author || 'Admin'}</p>
+                <p className="text-xs text-gray-500">{formatDate(blog.createdAt)}</p>
+              </div>
             </div>
           )}
-        </div>
-      )}
-      
-      <div className="p-5">
-        {/* Author info */}
-        <div className="flex items-center gap-3 mb-3">
-          {blog.authorImage && (
-            <img 
-              src={blog.authorImage} 
-              alt={blog.author} 
-              className="w-8 h-8 rounded-full object-cover" 
-            />
+
+          {/* Read More Button - Only for large cards */}
+          {size === 'large' && (
+            <div className="entry-ctas">
+              <Link 
+                to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`}
+                className="inline-block px-5 py-2.5 bg-black text-white font-medium rounded hover:bg-gray-800 transition-colors"
+                onClick={handleReadMore}
+              >
+                Read More
+              </Link>
+            </div>
           )}
-          <div>
-            <p className="text-sm font-medium text-gray-800">{blog.author || 'Admin'}</p>
-            <p className="text-xs text-gray-500">
-              {new Date(blog.createdAt).toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric'
-              })}
-            </p>
-          </div>
-        </div>
 
-        {/* Title and content */}
-        <h3 className="text-xl font-bold text-gray-900 mb-2 line-clamp-2 hover:text-black transition-colors">
-          <Link to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`}>
-            {blog.title}
-          </Link>
-        </h3>
-        
-        <p className="text-gray-600 mb-4 leading-relaxed">
-          {truncateContent(blog.content)}
-        </p>
-
-        {/* Tags below content (if no image) */}
-        {!blog.blogImage && tags.length > 0 && (
-          <TagChips 
-            tags={tags} 
-            onClick={handleTagClick}
-            maxTags={4}
-            className="mb-4"
-          />
-        )}
-
-        {/* Footer with stats and read more */}
-        <div className="flex items-center justify-between border-t pt-3">
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1">
-              <span className="text-red-500">❤️</span>
-              {blog.likes || 0} likes
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="text-black">💬</span>
-              {blog.comments?.length || 0} comments
-            </span>
-          </div>
-          
-          <Link 
-            to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`} 
-            onClick={handleReadMore}
-            className="text-black hover:text-gray-800 font-medium text-sm transition-colors flex items-center gap-1"
-          >
-            Read more
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
+          {/* Small stats for normal/small cards */}
+          {(size === 'normal' || size === 'small') && (
+            <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
+              <span>{formatDate(blog.createdAt)}</span>
+              <span className="flex items-center gap-2">
+                <span className="flex items-center">
+                  ❤️ {blog.likes || 0}
+                </span>
+                <span className="flex items-center ml-2">
+                  💬 {blog.comments?.length || 0}
+                </span>
+              </span>
+            </div>
+          )}
+        </header>
       </div>
     </article>
   );

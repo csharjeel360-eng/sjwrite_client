@@ -464,11 +464,12 @@ export default function BlogDetail() {
 
             {/* Featured Image with Tags and Like Count */}
             {blog.blogImage && (
-              <div className="relative overflow-hidden rounded-lg mb-6 shadow-lg">
+              <div className="relative overflow-hidden rounded-lg mb-6 shadow-lg w-full">
                 <img 
                   src={blog.blogImage} 
-                  className="w-full h-48 md:h-72 object-cover" 
-                  alt={blog.title} 
+                  className="w-full h-auto object-cover"
+                  alt={blog.title}
+                  loading="lazy"
                 />
                 
                 {/* Tags displayed at the bottom of the image */}

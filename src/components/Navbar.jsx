@@ -1,78 +1,65 @@
- import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 
-export default function Navbar() {
+export default function Navbar({ onSearch }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [logoText, setLogoText] = useState('');
-  const [isTyping, setIsTyping] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const navigate = useNavigate();
 
-  // Typewriter animation for logo
-  useEffect(() => {
-    const fullText = 'SJWrites';
-    let currentIndex = 0;
-    let timeoutId;
-
-    const typeText = () => {
-      if (currentIndex <= fullText.length) {
-        setLogoText(fullText.substring(0, currentIndex));
-        currentIndex++;
-        timeoutId = setTimeout(typeText, 150);
-      } else {
-        setIsTyping(false);
-        // After finishing, restart the animation after a delay
-        timeoutId = setTimeout(() => {
-          setLogoText('');
-          currentIndex = 0;
-          setIsTyping(true);
-          typeText();
-        }, 10000);
-      }
-    };
-
-    // Start the animation
-    typeText();
-
-    // Cleanup on component unmount
-    return () => {
-      if (timeoutId) clearTimeout(timeoutId);
-    };
-  }, []);
-
-  // Check if admin is logged in on component mount and on changes
+  // Check if admin is logged in
   useEffect(() => {
     const checkAuthStatus = () => {
       const token = localStorage.getItem('adminToken');
       setIsAdmin(!!token);
     };
     
-    // Check initially
     checkAuthStatus();
     
-    // Listen for custom auth events (triggered after login/logout)
     const handleAuthChange = () => {
       checkAuthStatus();
     };
     
-    // Listen for storage events (login/logout from other tabs)
     const handleStorageChange = (e) => {
       if (e.key === 'adminToken') {
         checkAuthStatus();
       }
     };
     
-    // Add event listeners
     window.addEventListener('authChange', handleAuthChange);
     window.addEventListener('storage', handleStorageChange);
     
-    // Cleanup
     return () => {
       window.removeEventListener('authChange', handleAuthChange);
       window.removeEventListener('storage', handleStorageChange);
     };
   }, []);
+
+  // Handle search
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+        if (onSearch && q) {
+          onSearch(q);
+          if (window.location.pathname !== '/') navigate('/');
+        } else {
+          // Ensure Home is shown first, then broadcast search event
+          if (window.location.pathname !== '/') navigate('/');
+          setTimeout(() => window.dispatchEvent(new CustomEvent('siteSearch', { detail: q })), 50);
+    }
+  };
+
+  // Clear search
+  const handleClearSearch = () => {
+    setSearchQuery('');
+    if (onSearch) {
+      onSearch('');
+    }
+        // Navigate home and broadcast clear so listeners reset
+        if (window.location.pathname !== '/') navigate('/');
+        setTimeout(() => window.dispatchEvent(new CustomEvent('siteSearch', { detail: '' })), 50);
+  };
 
   // Handle logout
   const handleLogout = () => {
@@ -80,27 +67,22 @@ export default function Navbar() {
     setIsAdmin(false);
     setIsMenuOpen(false);
     setIsUserMenuOpen(false);
-    
-    // Dispatch custom event to update all navbar instances
     window.dispatchEvent(new Event('authChange'));
-    
-    // Redirect to home page after logout
     navigate('/');
   };
 
   return (
-    <nav className="bg-white/80 backdrop-blur shadow-sm sticky top-0 z-50">
-      <div className="max-w-6xl mx-auto px-4 py-3">
+    <nav className="bg-white/95 backdrop-blur shadow-sm sticky top-0 z-50">
+      <div className="max-w-7xl mx-auto px-4 py-3">
         <div className="flex items-center justify-between">
           {/* Logo and Left Navigation */}
           <div className="flex items-center gap-6">
-            {/* Animated Logo */}
+            {/* Fixed Logo */}
             <Link 
               to="/" 
-              className="text-2xl font-bold text-black flex items-center min-h-[2rem]"
+              className="text-2xl font-bold text-black flex items-center"
             >
-              {logoText}
-              <span className={`ml-0.5 bg-black h-6 w-0.5 ${isTyping ? 'animate-pulse' : 'opacity-0'}`}></span>
+              SJ Writes
             </Link>
 
             {/* Desktop Navigation - Left Side */}
@@ -157,76 +139,100 @@ export default function Navbar() {
             </div>
           </div>
 
+          {/* Search Bar (Desktop) */}
+          <div className="hidden md:block flex-1 max-w-xl mx-4">
+            <form onSubmit={handleSearchSubmit} className="relative">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setSearchQuery(v);
+                  if (onSearch) {
+                    onSearch(v);
+                  } else {
+                    window.dispatchEvent(new CustomEvent('siteSearch', { detail: v }));
+                  }
+                }}
+                placeholder="Search posts..."
+                className="w-full px-4 py-2 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent bg-gray-50"
+              />
+              {/* Search Icon */}
+              <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+              </div>
+              {/* Clear Button */}
+              {searchQuery && (
+                <button
+                  type="button"
+                  onClick={handleClearSearch}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </form>
+          </div>
+
           {/* Right Side - User Actions */}
           <div className="flex items-center gap-4">
-            {/* User Menu (Desktop) */}
+            {/* Search Button (Mobile) */}
+            <button 
+              className="md:hidden p-2 text-gray-700 hover:text-black"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </button>
+
+            {/* User Menu */}
             <div className="relative">
-              {isAdmin ? (
-                <div className="flex items-center gap-4">
-                  <button 
-                    onClick={handleLogout}
-                    className="hidden md:block text-gray-700 hover:text-red-600 transition"
-                  >
-                    Logout
-                  </button>
-                  
-                  {/* User icon with dropdown */}
-                  <div className="relative">
-                    <button 
-                      onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                      className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </button>
-                    
-                    {/* Dropdown menu */}
-                    {isUserMenuOpen && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
-                        <div className="px-4 py-2 border-b border-gray-100">
-                          <p className="text-sm font-medium text-gray-900">Admin User</p>
-                          <p className="text-xs text-gray-500">Administrator</p>
-                        </div>
-                        <Link 
-                          to="/admin/dashboard" 
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          Dashboard
-                        </Link>
-                        <Link 
-                          to="/admin/registeration" 
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          Add New Admin
-                        </Link>
-                        <button 
-                          onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
-                        >
-                          Logout
-                        </button>
+              <button 
+                onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+                className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+              </button>
+              
+              {/* Dropdown menu */}
+              {isUserMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                  {isAdmin ? (
+                    <>
+                      <div className="px-4 py-2 border-b border-gray-100">
+                        <p className="text-sm font-medium text-gray-900">Admin User</p>
+                        <p className="text-xs text-gray-500">Administrator</p>
                       </div>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                /* Login button replaced with user icon */
-                <div className="relative">
-                  <button 
-                    onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                    </svg>
-                  </button>
-                  
-                  {/* Dropdown menu for non-logged in users */}
-                  {isUserMenuOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
+                      <Link 
+                        to="/admin/dashboard" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Dashboard
+                      </Link>
+                      <Link 
+                        to="/admin/registeration" 
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsUserMenuOpen(false)}
+                      >
+                        Add New Admin
+                      </Link>
+                      <button 
+                        onClick={handleLogout}
+                        className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
+                      >
+                        Logout
+                      </button>
+                    </>
+                  ) : (
+                    <>
                       <div className="px-4 py-2 border-b border-gray-100">
                         <p className="text-sm font-medium text-gray-900">Guest User</p>
                         <p className="text-xs text-gray-500">Not logged in</p>
@@ -238,7 +244,7 @@ export default function Navbar() {
                       >
                         Admin Login
                       </Link>
-                    </div>
+                    </>
                   )}
                 </div>
               )}
@@ -265,13 +271,51 @@ export default function Navbar() {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
+        {/* Mobile Navigation Menu (includes search on mobile) */}
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-2 space-y-3">
+            {/* Mobile Search Bar */}
+            <form onSubmit={handleSearchSubmit} className="px-4">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    const v = e.target.value;
+                    setSearchQuery(v);
+                    if (onSearch) {
+                      onSearch(v);
+                    } else {
+                      window.dispatchEvent(new CustomEvent('siteSearch', { detail: v }));
+                    }
+                  }}
+                  placeholder="Search posts..."
+                  className="w-full px-4 py-2 pl-10 pr-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
+                />
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                {searchQuery && (
+                  <button
+                    type="button"
+                    onClick={handleClearSearch}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            </form>
+
+            {/* Mobile Navigation Links */}
             <NavLink 
               to="/" 
               className={({isActive}) => 
-                `block py-2 px-4 rounded-md ${isActive ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+                `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`
               }
               onClick={() => setIsMenuOpen(false)}
             >
@@ -280,7 +324,7 @@ export default function Navbar() {
             <NavLink 
               to="/blogs" 
               className={({isActive}) => 
-                `block py-2 px-4 rounded-md ${isActive ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+                `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`
               }
               onClick={() => setIsMenuOpen(false)}
             >
@@ -289,7 +333,7 @@ export default function Navbar() {
             <NavLink 
               to="/about" 
               className={({isActive}) => 
-                `block py-2 px-4 rounded-md ${isActive ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+                `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`
               }
               onClick={() => setIsMenuOpen(false)}
             >
@@ -302,7 +346,7 @@ export default function Navbar() {
                 <NavLink 
                   to="/admin/dashboard" 
                   className={({isActive}) => 
-                    `block py-2 px-4 rounded-md ${isActive ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+                    `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`
                   }
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -312,7 +356,7 @@ export default function Navbar() {
                 <NavLink 
                   to="/admin/registeration" 
                   className={({isActive}) => 
-                    `block py-2 px-4 rounded-md ${isActive ? 'bg-blue-100 text-blue-600 font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+                    `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`
                   }
                   onClick={() => setIsMenuOpen(false)}
                 >
@@ -332,7 +376,7 @@ export default function Navbar() {
             {!isAdmin && (
               <NavLink 
                 to="/admin/login" 
-                className="block py-2 px-4 rounded-md bg-blue-600 text-white hover:bg-blue-700"
+                className="block py-2 px-4 rounded-md bg-black text-white hover:bg-gray-800"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Admin Login

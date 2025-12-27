@@ -1,9 +1,7 @@
  import { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import BlogCard from './BlogCard';
-import SearchBar from './SearchBar';
-import SortBar from './SortBar';
-import TagChips from './TagChips';
+// Sort removed — global navbar search is used instead
 
 // Helper function to safely extract tags from blog objects
 const extractAllTags = (blogs) => {
@@ -37,12 +35,10 @@ const extractAllTags = (blogs) => {
 export default function BlogList() {
   const [blogs, setBlogs] = useState([]);
   const [filteredBlogs, setFilteredBlogs] = useState([]);
-  const [allTags, setAllTags] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeFilter, setActiveFilter] = useState('all');
-  const [sortBy, setSortBy] = useState('date');
+  // removed activeFilter and sortBy state
 
   const load = async () => {
     try {
@@ -52,8 +48,7 @@ export default function BlogList() {
       setBlogs(data);
       setFilteredBlogs(data);
       
-      const tags = extractAllTags(data);
-      setAllTags(tags);
+      // tags removed — tag filtering handled via navbar search
     } catch (err) {
       setError('Failed to load blogs. Please try again.');
       console.error('Error loading blogs:', err);
@@ -81,60 +76,20 @@ export default function BlogList() {
       );
     }
     
-    // Apply tag filter
-    if (activeFilter !== 'all') {
-      result = result.filter(blog => 
-        blog.tags && 
-        (Array.isArray(blog.tags) ? blog.tags.includes(activeFilter) : 
-         typeof blog.tags === 'string' && blog.tags.split(',').map(t => t.trim()).includes(activeFilter))
-      );
-    }
+    // tag filter removed
     
-    // Apply sorting
-    switch(sortBy) {
-      case 'date':
-        result.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        break;
-      case 'date_oldest':
-        result.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
-        break;
-      case 'likes':
-        result.sort((a, b) => (b.likes || 0) - (a.likes || 0));
-        break;
-      case 'comments':
-        result.sort((a, b) => (b.comments?.length || 0) - (a.comments?.length || 0));
-        break;
-      case 'title_asc':
-        result.sort((a, b) => a.title.localeCompare(b.title));
-        break;
-      case 'title_desc':
-        result.sort((a, b) => b.title.localeCompare(a.title));
-        break;
-      default:
-        break;
-    }
+    // sorting removed — results are presented in natural order or controlled by the backend
     
     setFilteredBlogs(result);
-  }, [blogs, searchQuery, activeFilter, sortBy]);
+  }, [blogs, searchQuery]);
 
   const handleSearch = (query) => {
     setSearchQuery(query);
-    setActiveFilter('all');
-  };
-
-  const handleSort = (sortValue) => {
-    setSortBy(sortValue);
-  };
-
-  const handleTag = (tag) => {
-    setActiveFilter(tag === activeFilter ? 'all' : tag);
-    setSearchQuery('');
   };
 
   const clearFilters = () => {
     setSearchQuery('');
-    setActiveFilter('all');
-    setSortBy('date');
+    // sort state removed
   };
 
   if (loading) {
@@ -168,10 +123,7 @@ export default function BlogList() {
   if (error) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col md:flex-row gap-4 md:items-center md:justify-between mb-8">
-          <SearchBar onSearch={handleSearch} placeholder="Search blog posts..." />
-          <SortBar onSort={handleSort} defaultSort={sortBy} />
-        </div>
+        {/* header removed (use navbar search) */}
         
         <div className="text-center py-12 bg-white rounded-xl shadow-sm border border-gray-100">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
@@ -194,45 +146,13 @@ export default function BlogList() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Filters Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
-        <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between mb-4">
-          <div className="w-full lg:w-1/2">
-            <SearchBar onSearch={handleSearch} placeholder="Search blog posts..." />
-          </div>
-          <div className="w-full lg:w-48">
-            <SortBar onSort={handleSort} defaultSort={sortBy} />
-          </div>
-        </div>
-
-        {allTags.length > 0 && (
-          <div className="border-t pt-4">
-            <div className="flex items-center justify-between gap-4 mb-3">
-              <h3 className="text-sm font-medium text-gray-700">Filter by tags:</h3>
-              {(searchQuery || activeFilter !== 'all') && (
-                <button
-                  onClick={clearFilters}
-                  className="text-sm text-black hover:text-gray-800 font-medium"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
-            <TagChips 
-              tags={allTags} 
-              onClick={handleTag} 
-              activeTag={activeFilter !== 'all' ? activeFilter : null}
-            />
-          </div>
-        )}
-      </div>
+      {/* Filters removed - using global navbar search */}
 
       {/* Results Count */}
       <div className="mb-6">
         <p className="text-sm text-gray-600">
           {filteredBlogs.length} blog{filteredBlogs.length !== 1 ? 's' : ''} found
           {searchQuery && ` for "${searchQuery}"`}
-          {activeFilter !== 'all' && ` tagged with "${activeFilter}"`}
         </p>
       </div>
 
