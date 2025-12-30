@@ -40,6 +40,24 @@ export default function AdRocks({
     }
 
     const initAds = async () => {
+      const fetchWithRetries = async (url, opts = {}, retries = 2, baseDelay = 400) => {
+        let lastErr = null
+        for (let attempt = 0; attempt <= retries; attempt++) {
+          try {
+            const res = await fetch(url, opts)
+            if (res.ok) return res
+            const errText = await res.text().catch(() => '')
+            lastErr = new Error(`HTTP ${res.status} ${errText.slice(0, 200)}`)
+          } catch (e) {
+            lastErr = e
+          }
+          if (attempt < retries) {
+            const wait = baseDelay * Math.pow(2, attempt)
+            await new Promise((r) => setTimeout(r, wait))
+          }
+        }
+        throw lastErr
+      }
       try {
         const advertises = document.getElementsByClassName('MainAdverTiseMentDiv')
         const scripTags = document.getElementsByClassName(classNameScript)
@@ -58,20 +76,13 @@ export default function AdRocks({
 
           try {
             console.debug('AdRocks: fetching ad URL ->', AdUrl)
-            const res = await fetch(AdUrl)
-            console.debug('AdRocks: fetch response', res.status, res.statusText)
-            if (!res.ok) {
-              const errText = await res.text().catch(() => '')
-              const snippet = errText ? errText.slice(0, 200) + (errText.length > 200 ? '...': '') : ''
-              console.error('Ad fetch failed:', res.status, snippet)
-              setFailed(true)
-              continue
-            }
+            const res = await fetchWithRetries(AdUrl, {}, 2, 500)
             const text = await res.text()
             adElem.innerHTML = text
             if (!adHtml) setAdHtml(text)
           } catch (err) {
-            console.error('Ad fetch error:', err && err.message ? err.message : err)
+            const msg = err && err.message ? err.message : String(err)
+            console.error('Ad fetch final failure:', msg.slice ? msg.slice(0, 300) : msg)
             setFailed(true)
           }
         }
