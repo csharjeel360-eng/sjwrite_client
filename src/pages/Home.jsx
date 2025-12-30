@@ -432,7 +432,7 @@ export default function Home() {
                   {index === 1 && (
                     <div className="entry-tpl-tile g1-dark">
                       <div className="entry-featured-media">
-                        <AdRocks cardSize="normal" />
+                        <AdRocks publisher="eyJpdiI6IitPMHBxdWp4Y01wcjYxTUs3TlVWSEE9PSIsInZhbHVlIjoiRENtaGM4bGFVVkxSOUN3NXl5WmVoZz09IiwibWFjIjoiYzQ1NTE5NjFkM2IzNDgwOTkzNDU1ZmYwM2RlOTU2N2Y3MzFjNGYzM2RmYjMxMzQ4ZDhiOTA1NmM1MzE2OTM4MSJ9" adsize="300x300" cardSize="custom" />
                       </div>
                       <div className="entry-body p-4 bg-white" />
                     </div>
