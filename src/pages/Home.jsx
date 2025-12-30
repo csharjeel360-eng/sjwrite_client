@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import BlogCard from '../components/BlogCard';
-import AdRocks from '../components/AdRocks';
 import { Helmet } from 'react-helmet-async';
 
 // Helper function to generate URL-friendly slug
@@ -343,8 +342,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {getNextThreePosts().map((post, index) => (
-                <React.Fragment key={post._id}>
-                  <article className="entry-tpl-tile g1-dark">
+                <article key={post._id} className="entry-tpl-tile g1-dark">
                   {/* Featured Image */}
                   <div className="entry-featured-media">
                     <Link 
@@ -426,18 +424,7 @@ export default function Home() {
                       </div>
                     </header>
                   </div>
-                  </article>
-
-                  {/* Insert ad after the 5th overall post (after the second of the next-three block) */}
-                  {index === 1 && (
-                    <div className="entry-tpl-tile g1-dark">
-                      <div className="entry-featured-media">
-                        <AdRocks publisher="eyJpdiI6IitPMHBxdWp4Y01wcjYxTUs3TlVWSEE9PSIsInZhbHVlIjoiRENtaGM4bGFVVkxSOUN3NXl5WmVoZz09IiwibWFjIjoiYzQ1NTE5NjFkM2IzNDgwOTkzNDU1ZmYwM2RlOTU2N2Y3MzFjNGYzM2RmYjMxMzQ4ZDhiOTA1NmM1MzE2OTM4MSJ9" adsize="300x300" cardSize="custom" />
-                      </div>
-                      <div className="entry-body p-4 bg-white" />
-                    </div>
-                  )}
-                </React.Fragment>
+                </article>
               ))}
             </div>
           </div>
