@@ -8,6 +8,7 @@ export default function AdRocks({
   cardSize = 'normal',
 }) {
   const [adHtml, setAdHtml] = useState('')
+  const [failed, setFailed] = useState(false)
   const [visible, setVisible] = useState(autoOpen)
 
   const sizeMap = {
@@ -54,21 +55,25 @@ export default function AdRocks({
           const getPublisher = adElem.getAttribute('data-publisher') || publisher
           const AdUrl = siteurl + '/ads/' + getPublisher + '/' + getAdSize + '/' + currentUrl
 
-            try {
-              console.debug('AdRocks: fetching ad URL ->', AdUrl)
-              const res = await fetch(AdUrl)
-              console.debug('AdRocks: fetch response', res.status, res.statusText)
-              if (!res.ok) {
-                const errText = await res.text().catch(() => '')
-                console.error('Ad fetch failed:', res.status, errText)
-                continue
-              }
-              const text = await res.text()
-              adElem.innerHTML = text
-              if (!adHtml) setAdHtml(text)
-            } catch (err) {
-              console.error('Ad fetch error:', err)
+
+          try {
+            console.debug('AdRocks: fetching ad URL ->', AdUrl)
+            const res = await fetch(AdUrl)
+            console.debug('AdRocks: fetch response', res.status, res.statusText)
+            if (!res.ok) {
+              const errText = await res.text().catch(() => '')
+              const snippet = errText ? errText.slice(0, 200) + (errText.length > 200 ? '...': '') : ''
+              console.error('Ad fetch failed:', res.status, snippet)
+              setFailed(true)
+              continue
             }
+            const text = await res.text()
+            adElem.innerHTML = text
+            if (!adHtml) setAdHtml(text)
+          } catch (err) {
+            console.error('Ad fetch error:', err && err.message ? err.message : err)
+            setFailed(true)
+          }
         }
       } catch (e) {
         console.error(e)
@@ -90,7 +95,7 @@ export default function AdRocks({
     return () => {
       window.removeEventListener('load', initAds)
     }
-  }, [adsize, publisher, scriptSrc, adHtml])
+  }, [adsize, publisher, scriptSrc])
 
   return (
     <>
@@ -103,6 +108,10 @@ export default function AdRocks({
         <div className={`g1-frame-inner ${imageHeightClass} rounded-lg overflow-hidden`}>
           {adHtml ? (
             <div dangerouslySetInnerHTML={{ __html: adHtml }} />
+          ) : failed ? (
+            <div style={{ width: '100%', height: '100%', background: '#f3f3f3', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>
+              <div>Ad unavailable</div>
+            </div>
           ) : (
             <div style={{ width: '100%', height: '100%', background: '#f3f3f3' }} />
           )}
