@@ -1,14 +1,16 @@
 {
-  "name": "clint",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "lint": "eslint .",
-    "preview": "vite preview"
-  },
+   "name": "sjwrites",
+   "homepage": "https://sjwrites.com",
+   "private": true,
+   "version": "0.0.0",
+   "type": "module",
+   "scripts": {
+      "dev": "vite",
+      "build": "vite build",
+      "preview": "vite preview",
+      "lint": "eslint .",
+      "deploy": "vite build"
+   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.13",
     "framer-motion": "^12.23.22",

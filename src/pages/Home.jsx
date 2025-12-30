@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { api } from '../api/client';
 import BlogCard from '../components/BlogCard';
-import { Helmet } from 'react-helmet';
+import AdRocks from '../components/AdRocks';
+import { Helmet } from 'react-helmet-async';
 
 // Helper function to generate URL-friendly slug
 const generateSlug = (title) => {
@@ -130,7 +131,13 @@ export default function Home() {
     <main className="min-h-screen bg-white">
       <Helmet>
         <title>SJWrites - Entertaining & Trending Stories and Much More</title>
-        <meta name="description" content="Neemopani - Entertaining & Trending Stories, Fun Videos, Celebrity News and Photos is a one stop shop for all your entertainment news." />
+        <meta name="description" content="SJWrites - Entertaining & Trending Stories, Fun Videos, Celebrity News and Photos is a one stop shop for all your entertainment news." />
+        {/* Performance hints: preconnect fonts and preload hero image when available */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
+        {featuredPost && featuredPost.blogImage && (
+          <link rel="preload" as="image" href={featuredPost.blogImage} />
+        )}
       </Helmet>
 
       {/* Search Results (shown when user types in navbar) */}
@@ -180,7 +187,11 @@ export default function Home() {
                             src={featuredPost.blogImage}
                             alt={featuredPost.title}
                             className="w-full h-96 object-cover lazyloaded rounded-lg"
-                            loading="lazy"
+                            loading="eager"
+                            fetchpriority="high"
+                            width="1200"
+                            height="675"
+                            decoding="async"
                           />
                         )}
                         <span className="g1-frame-icon"></span>
@@ -258,6 +269,9 @@ export default function Home() {
                             alt={post.title}
                             className="w-full h-48 object-cover lazyloaded rounded-lg"
                             loading="lazy"
+                            width="600"
+                            height="320"
+                            decoding="async"
                           />
                         )}
                         <span className="g1-frame-icon"></span>
@@ -329,7 +343,8 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {getNextThreePosts().map((post, index) => (
-                <article key={post._id} className="entry-tpl-tile g1-dark">
+                <React.Fragment key={post._id}>
+                  <article className="entry-tpl-tile g1-dark">
                   {/* Featured Image */}
                   <div className="entry-featured-media">
                     <Link 
@@ -343,6 +358,9 @@ export default function Home() {
                             alt={post.title}
                             className="w-full h-56 object-cover lazyloaded rounded-lg"
                             loading="lazy"
+                            width="800"
+                            height="450"
+                            decoding="async"
                           />
                         )}
                         <span className="g1-frame-icon"></span>
@@ -408,7 +426,18 @@ export default function Home() {
                       </div>
                     </header>
                   </div>
-                </article>
+                  </article>
+
+                  {/* Insert ad after the 5th overall post (after the second of the next-three block) */}
+                  {index === 1 && (
+                    <div className="entry-tpl-tile g1-dark">
+                      <div className="entry-featured-media">
+                        <AdRocks cardSize="normal" />
+                      </div>
+                      <div className="entry-body p-4 bg-white" />
+                    </div>
+                  )}
+                </React.Fragment>
               ))}
             </div>
           </div>

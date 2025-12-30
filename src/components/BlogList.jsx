@@ -1,6 +1,7 @@
- import { useEffect, useState } from 'react';
+ import React, { useEffect, useState } from 'react';
 import { api } from '../api/client';
 import BlogCard from './BlogCard';
+import AdRocks from './AdRocks';
 // Sort removed — global navbar search is used instead
 
 // Helper function to safely extract tags from blog objects
@@ -175,8 +176,18 @@ export default function BlogList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredBlogs.map(blog => (
-            <BlogCard key={blog._id} blog={blog} />
+          {filteredBlogs.map((blog, idx) => (
+            <React.Fragment key={blog._id}>
+              <BlogCard blog={blog} />
+              {idx === 4 && (
+                <div className="entry-tpl-tile g1-dark">
+                  <div className="entry-featured-media">
+                    <AdRocks cardSize="normal" />
+                  </div>
+                  <div className="entry-body p-4 bg-white" />
+                </div>
+              )}
+            </React.Fragment>
           ))}
         </div>
       )}
