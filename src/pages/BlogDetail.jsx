@@ -509,16 +509,36 @@ export default function BlogDetail() {
 
           {/* Main Content */}
           <main className={`${headings.length > 0 ? 'lg:flex-1' : 'max-w-3xl mx-auto'} mb-12`}>
-            {/* Breadcrumb */}
-            <nav className="text-sm text-gray-500 mb-6">
-              <Link to="/" className="hover:text-black">Home</Link>
-              <span className="mx-2">/</span>
-              <Link to="/blogs" className="hover:text-black">Blogs</Link>
-              <span className="mx-2">/</span>
-              <span className="text-gray-800 line-clamp-1">{blog.title}</span>
-            </nav>
+            {/* Breadcrumb removed per request */}
 
-            {/* Featured Image with Tags and Like Count */}
+            {/* Logo + Byline (shows before the title) */}
+            <div className="flex items-center gap-4 mb-4">
+              <img src={profileImage} alt="SJWrites logo" className="w-14 h-14 rounded-full object-cover" />
+              <div className="text-sm text-gray-600">
+                <div className="font-medium">by Sharjeel</div>
+                <div className="flex items-center gap-3">
+                  <span>{new Date(blog.createdAt).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                  })}</span>
+                  <button
+                    onClick={shareBlog}
+                    className="text-sm px-2 py-1 bg-gray-50 rounded hover:bg-gray-100 transition-colors"
+                    aria-label="Share post"
+                  >
+                    Share
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
+              {blog.title}
+            </h1>
+
+            {/* Featured Image now shown after title */}
             {blog.blogImage && (
               <div className="relative overflow-hidden rounded-lg mb-6 shadow-lg w-full">
                 <img 
@@ -527,7 +547,7 @@ export default function BlogDetail() {
                   alt={blog.title}
                   loading="lazy"
                 />
-                
+
                 {/* Tags displayed at the bottom of the image */}
                 {tags.length > 0 && (
                   <div className="absolute bottom-3 left-3 right-3 flex flex-wrap gap-2">
@@ -547,7 +567,7 @@ export default function BlogDetail() {
                     )}
                   </div>
                 )}
-                
+
                 {/* Like count overlay at top right */}
                 <div className="absolute top-3 right-3 flex items-center gap-1 px-3 py-1.5 rounded-full bg-black/70 text-white backdrop-blur-sm">
                   <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
@@ -558,13 +578,13 @@ export default function BlogDetail() {
               </div>
             )}
 
-            {/* Title and Metadata */}
-            <h1 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
-              {blog.title}
-            </h1>
-            
+            {/* Author, publish date and share */}
             <div className="flex flex-wrap items-center gap-4 text-gray-600 mb-6">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm">
+                <span className="font-medium">by Sharjeel</span>
+              </div>
+
+              <div className="flex items-center gap-2 text-sm">
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
                   <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
                 </svg>
@@ -575,22 +595,16 @@ export default function BlogDetail() {
                 })}</span>
               </div>
 
-              <div className="flex items-center gap-2">
+              <button
+                onClick={shareBlog}
+                className="flex items-center gap-2 px-3 py-1 rounded-lg bg-gray-50 text-black hover:bg-gray-100 transition-colors"
+                aria-label="Share"
+              >
                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
+                  <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
                 </svg>
-                <span>{Math.ceil(blog.content.split(' ').length / 200)} min read</span>
-              </div>
-
-              {views > 0 && (
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
-                    <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
-                  </svg>
-                  <span>{views} views</span>
-                </div>
-              )}
+                <span className="text-sm">Share</span>
+              </button>
             </div>
 
             {/* Author Info */}
@@ -614,70 +628,7 @@ export default function BlogDetail() {
               </div>
             )}
 
-            {/* Action Buttons */}
-            <div className="flex flex-wrap gap-3 mb-8 pb-6 border-b">
-              <button 
-                onClick={like} 
-                disabled={liking || hasLiked}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors disabled:opacity-50 ${
-                  hasLiked 
-                    ? 'bg-green-100 text-green-600 cursor-not-allowed' 
-                    : 'bg-red-50 text-red-600 hover:bg-red-100'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                </svg>
-                <span className="font-medium">
-                  {liking ? 'Liking...' : hasLiked ? 'Liked' : 'Like'}
-                </span>
-              </button>
-
-              <button
-                onClick={toggleBookmark}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
-                  isBookmarked 
-                    ? 'bg-yellow-100 text-yellow-600' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" />
-                </svg>
-                <span>{isBookmarked ? 'Bookmarked' : 'Bookmark'}</span>
-              </button>
-
-              <button
-                onClick={shareBlog}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-50 text-black hover:bg-gray-100 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-                </svg>
-                <span>Share</span>
-              </button>
-
-              <button
-                onClick={copyLink}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
-                  <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
-                </svg>
-                <span>Copy Link</span>
-              </button>
-
-              <button
-                onClick={printBlog}
-                className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
-              >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
-                </svg>
-                <span>Print</span>
-              </button>
-            </div>
+            {/* Removed action buttons (Like / Bookmark / Share / Copy / Print) per request */}
 
             {/* Content */}
             <div className="mb-8">
