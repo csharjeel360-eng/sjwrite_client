@@ -46,3 +46,80 @@
 .markdown-content a:hover {
   color: #111827;
 }
+
+/* nemopani-style blog cards */
+.blog-card-nemopani {
+  border: 1px solid #e5e7eb;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.blog-card-nemopani:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Image aspect ratio */
+.blog-card-nemopani .aspect-\[4\/3\] {
+  position: relative;
+  padding-bottom: 75%; /* 4:3 aspect ratio */
+}
+
+.blog-card-nemopani .aspect-\[4\/3\] > * {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Line clamp for titles */
+.line-clamp-2 {
+  display: -webkit-box;
+  line-clamp: 2;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .blog-card-nemopani {
+    border-radius: 6px;
+  }
+  
+  .blog-card-nemopani .aspect-\[4\/3\] {
+    padding-bottom: 70%; /* Slightly taller on mobile */
+  }
+  
+  .blog-card-nemopani h3 {
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+  
+  /* Hide stats on very small screens */
+  .blog-card-nemopani .hidden.sm\\:flex {
+    display: none;
+  }
+}
+
+/* Tablet adjustments */
+@media (min-width: 641px) and (max-width: 768px) {
+  .blog-card-nemopani h3 {
+    font-size: 1.1rem;
+  }
+}
+
+/* For grid layouts */
+.blog-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+  padding: 1rem;
+}
+
+@media (min-width: 1024px) {
+  .blog-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 2rem;
+  }
+}

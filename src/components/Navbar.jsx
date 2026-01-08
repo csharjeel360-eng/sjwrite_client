@@ -113,6 +113,14 @@ export default function Navbar({ onSearch }) {
               >
                 About Us
               </NavLink>
+              <NavLink 
+                to="/contact" 
+                className={({isActive}) => 
+                  isActive ? 'text-black font-medium' : 'text-gray-700 hover:text-black'
+                }
+              >
+                Contact
+              </NavLink>
               
               {/* Show admin links only if authenticated */}
               {isAdmin && (
@@ -338,6 +346,15 @@ export default function Navbar({ onSearch }) {
               onClick={() => setIsMenuOpen(false)}
             >
               About Us
+            </NavLink>
+            <NavLink 
+              to="/contact" 
+              className={({isActive}) => 
+                `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`
+              }
+              onClick={() => setIsMenuOpen(false)}
+            >
+              Contact
             </NavLink>
             
             {/* Show admin links only if authenticated */}

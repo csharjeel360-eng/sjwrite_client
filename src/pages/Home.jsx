@@ -33,7 +33,7 @@ export default function Home() {
   const [featuredPost, setFeaturedPost] = useState(null);
   const [latestPosts, setLatestPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true); // ✅ This is line 12
   const [page, setPage] = useState(1);
   const postsPerPage = 50;
   const [searchQuery, setSearchQuery] = useState('');
@@ -106,6 +106,7 @@ export default function Home() {
     return sortedByDate.slice(3, 6);
   };
 
+  // ✅ Fix: Make sure this if statement is correctly placed
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
@@ -129,15 +130,53 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white">
       <Helmet>
+        {/* 🚀 CRITICAL SEO FIX: Add Canonical Tag */}
+        <link rel="canonical" href="https://sjwrites.com" />
+        
         <title>SJWrites - Entertaining & Trending Stories and Much More</title>
         <meta name="description" content="SJWrites - Entertaining & Trending Stories, Fun Videos, Celebrity News and Photos is a one stop shop for all your entertainment news." />
-        {/* Performance hints: preconnect fonts and preload hero image when available */}
+        
+        {/* 🚀 SEO FIX: Add Social Meta Tags for better sharing */}
+        <meta property="og:title" content="SJWrites - Entertaining & Trending Stories and Much More" />
+        <meta property="og:description" content="Your one-stop shop for entertainment news, stories, videos, and more." />
+        <meta property="og:image" content={featuredPost?.blogImage || "https://sjwrites.com/default-og.jpg"} />
+        <meta property="og:url" content="https://sjwrites.com" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="SJWrites - Entertaining & Trending Stories" />
+        <meta name="twitter:description" content="Your one-stop shop for entertainment news" />
+        <meta name="twitter:image" content={featuredPost?.blogImage || "https://sjwrites.com/default-og.jpg"} />
+        
+        {/* 🚀 SEO FIX: Add Schema Markup for search engines */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "url": "https://sjwrites.com",
+            "name": "SJWrites",
+            "description": "Entertaining & Trending Stories, Fun Videos, Celebrity News and Photos",
+            "publisher": {
+              "@type": "Organization",
+              "name": "SJWrites",
+              "logo": {
+                "@type": "ImageObject",
+                "url": "https://sjwrites.com/logo.png"
+              }
+            },
+            "inLanguage": "en-US"
+          })}
+        </script>
+        
+        {/* Performance hints */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
         {featuredPost && featuredPost.blogImage && (
           <link rel="preload" as="image" href={featuredPost.blogImage} />
         )}
       </Helmet>
+
+      {/* 🚀 SEO FIX: Add H1 Heading at the top of the page (invisible but for SEO) */}
+      <h1 className="sr-only">SJWrites - Entertaining & Trending Stories, Fun Videos, Celebrity News and Photos</h1>
 
       {/* Search Results (shown when user types in navbar) */}
       {searchQuery !== '' && (
@@ -163,7 +202,7 @@ export default function Home() {
         </section>
       )}
 
-      {/* Featured Section with Big Image - EXACTLY LIKE NEEMOPANI */}
+      {/* Featured Section with Big Image */}
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl font-bold mb-6 text-gray-900">FRESH</h2>
@@ -219,15 +258,15 @@ export default function Home() {
                         </span>
                       </div>
 
-                      {/* Title */}
-                      <h3 className="text-2xl md:text-3xl font-bold entry-title mb-4">
+                      {/* 🚀 CRITICAL FIX: Changed from h3 to h1 for the main featured article */}
+                      <h1 className="text-2xl md:text-3xl font-bold entry-title mb-4">
                         <Link 
                           to={`/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`}
                           className="text-gray-900 hover:text-black"
                         >
                           {featuredPost.title}
                         </Link>
-                      </h3>
+                      </h1>
 
                       {/* Excerpt */}
                       {featuredPost.content && (
@@ -299,15 +338,15 @@ export default function Home() {
                         </span>
                       </div>
 
-                      {/* Title */}
-                      <h3 className="text-lg font-bold entry-title">
+                      {/* Title - Keep as h2 for secondary articles */}
+                      <h2 className="text-lg font-bold entry-title">
                         <Link 
                           to={`/blog/${generateSlug(post.title)}?id=${post._id}`}
                           className="text-gray-900 hover:text-black"
                         >
                           {post.title}
                         </Link>
-                      </h3>
+                      </h2>
 
                       {/* Small stats */}
                       <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
@@ -387,15 +426,15 @@ export default function Home() {
                         </span>
                       </div>
 
-                      {/* Title */}
-                      <h3 className="text-xl font-bold entry-title mb-3">
+                      {/* Title - Keep as h2 for consistency */}
+                      <h2 className="text-xl font-bold entry-title mb-3">
                         <Link 
                           to={`/blog/${generateSlug(post.title)}?id=${post._id}`}
                           className="text-gray-900 hover:text-black"
                         >
                           {post.title}
                         </Link>
-                      </h3>
+                      </h2>
 
                       {/* Excerpt */}
                       {post.content && (
