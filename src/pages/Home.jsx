@@ -33,7 +33,7 @@ export default function Home() {
   const [featuredPost, setFeaturedPost] = useState(null);
   const [latestPosts, setLatestPosts] = useState([]);
   const [allPosts, setAllPosts] = useState([]);
-  const [loading, setLoading] = useState(true); // ✅ This is line 12
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const postsPerPage = 50;
   const [searchQuery, setSearchQuery] = useState('');
@@ -106,7 +106,33 @@ export default function Home() {
     return sortedByDate.slice(3, 6);
   };
 
-  // ✅ Fix: Make sure this if statement is correctly placed
+  // Generate structured data for all blog images
+  const generateImageStructuredData = () => {
+    const blogPosts = allPosts.slice(0, 10); // Limit to first 10 posts for homepage
+    const images = [];
+    
+    blogPosts.forEach(post => {
+      if (post.blogImage) {
+        images.push({
+          "@type": "ImageObject",
+          "url": post.blogImage,
+          "name": post.title,
+          "description": post.excerpt || markdownToPlainText(post.content).substring(0, 100),
+          "caption": post.title,
+          "contentUrl": post.blogImage,
+          "thumbnailUrl": post.blogImage,
+          "associatedArticle": {
+            "@type": "BlogPosting",
+            "headline": post.title,
+            "url": `https://sjwrites.com/blog/${generateSlug(post.title)}?id=${post._id}`
+          }
+        });
+      }
+    });
+    
+    return images;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
@@ -142,12 +168,17 @@ export default function Home() {
         <meta property="og:image" content={featuredPost?.blogImage || "https://sjwrites.com/default-og.jpg"} />
         <meta property="og:url" content="https://sjwrites.com" />
         <meta property="og:type" content="website" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="675" />
+        <meta property="og:image:alt" content="SJWrites - Featured Content" />
+        
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="SJWrites - Entertaining & Trending Stories" />
         <meta name="twitter:description" content="Your one-stop shop for entertainment news" />
         <meta name="twitter:image" content={featuredPost?.blogImage || "https://sjwrites.com/default-og.jpg"} />
+        <meta name="twitter:image:alt" content="SJWrites - Featured Content" />
         
-        {/* 🚀 SEO FIX: Add Schema Markup for search engines */}
+        {/* 🚀 SEO FIX: Add Website Schema Markup */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -160,12 +191,62 @@ export default function Home() {
               "name": "SJWrites",
               "logo": {
                 "@type": "ImageObject",
-                "url": "https://sjwrites.com/logo.png"
+                "url": "https://sjwrites.com/logo.png",
+                "width": 600,
+                "height": 60
               }
             },
-            "inLanguage": "en-US"
+            "inLanguage": "en-US",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://sjwrites.com/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
           })}
         </script>
+        
+        {/* 🚀 NEW: Add CollectionPage Schema for homepage with images */}
+        <script type="application/ld+json">
+          {JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "CollectionPage",
+            "name": "Latest Blog Posts - SJWrites",
+            "description": "Latest entertaining and trending stories from SJWrites",
+            "url": "https://sjwrites.com",
+            "hasPart": allPosts.slice(0, 5).map(post => ({
+              "@type": "BlogPosting",
+              "headline": post.title,
+              "description": post.excerpt || markdownToPlainText(post.content).substring(0, 150),
+              "image": post.blogImage,
+              "url": `https://sjwrites.com/blog/${generateSlug(post.title)}?id=${post._id}`,
+              "datePublished": post.createdAt,
+              "dateModified": post.updatedAt || post.createdAt
+            }))
+          })}
+        </script>
+        
+        {/* 🚀 NEW: Image Object Schema for featured images */}
+        {featuredPost?.blogImage && (
+          <script type="application/ld+json">
+            {JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "ImageObject",
+              "url": featuredPost.blogImage,
+              "name": featuredPost.title,
+              "description": featuredPost.excerpt || markdownToPlainText(featuredPost.content).substring(0, 100),
+              "caption": `Featured: ${featuredPost.title}`,
+              "contentUrl": featuredPost.blogImage,
+              "thumbnailUrl": featuredPost.blogImage,
+              "associatedArticle": {
+                "@type": "BlogPosting",
+                "headline": featuredPost.title,
+                "url": `https://sjwrites.com/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`
+              },
+              "width": "1200",
+              "height": "675"
+            })}
+          </script>
+        )}
         
         {/* Performance hints */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -212,29 +293,46 @@ export default function Home() {
             {/* Large featured post (left side - 2/3 width) */}
             {featuredPost && (
               <div className="lg:col-span-2">
-                <article className="entry-tpl-tile entry-tpl-tile-xl g1-dark">
-                  {/* Featured Image */}
-                  <div className="entry-featured-media">
+                <article className="entry-tpl-tile entry-tpl-tile-xl g1-dark" 
+                  itemScope 
+                  itemType="https://schema.org/BlogPosting"
+                  itemProp="hasPart"
+                >
+                  {/* Featured Image with Structured Data */}
+                  <div className="entry-featured-media" itemScope itemType="https://schema.org/ImageObject">
                     <Link 
                       to={`/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`} 
                       className="g1-frame"
+                      itemProp="url"
                     >
                       <div className="g1-frame-inner">
                         {featuredPost.blogImage && (
                           <img
                             src={featuredPost.blogImage}
-                            alt={featuredPost.title}
+                            alt={`${featuredPost.title} - Featured image on SJWrites`}
                             className="w-full h-96 object-cover lazyloaded rounded-lg"
                             loading="eager"
                             fetchpriority="high"
                             width="1200"
                             height="675"
                             decoding="async"
+                            itemProp="contentUrl"
+                            data-image="primary"
+                            // 🚀 NEW: These attributes help Google index the image
+                            data-indexable="true"
+                            data-article-id={featuredPost._id}
                           />
                         )}
                         <span className="g1-frame-icon"></span>
                       </div>
                     </Link>
+                    {/* Hidden structured data for the image */}
+                    <meta itemProp="name" content={featuredPost.title} />
+                    <meta itemProp="description" content={featuredPost.excerpt || markdownToPlainText(featuredPost.content).substring(0, 100)} />
+                    <meta itemProp="url" content={featuredPost.blogImage} />
+                    <meta itemProp="width" content="1200" />
+                    <meta itemProp="height" content="675" />
+                    <meta itemProp="caption" content={`Featured image for: ${featuredPost.title}`} />
                   </div>
 
                   {/* Content */}
@@ -250,6 +348,7 @@ export default function Home() {
                                 key={idx}
                                 href={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
                                 className="entry-category entry-category-item text-black hover:underline ml-1"
+                                itemProp="keywords"
                               >
                                 {tag}{idx === 0 ? ',' : ''}
                               </a>
@@ -258,11 +357,12 @@ export default function Home() {
                         </span>
                       </div>
 
-                      {/* 🚀 CRITICAL FIX: Changed from h3 to h1 for the main featured article */}
-                      <h1 className="text-2xl md:text-3xl font-bold entry-title mb-4">
+                      {/* Title */}
+                      <h1 className="text-2xl md:text-3xl font-bold entry-title mb-4" itemProp="headline">
                         <Link 
                           to={`/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`}
                           className="text-gray-900 hover:text-black"
+                          itemProp="url"
                         >
                           {featuredPost.title}
                         </Link>
@@ -270,7 +370,7 @@ export default function Home() {
 
                       {/* Excerpt */}
                       {featuredPost.content && (
-                        <p className="text-gray-600 mb-6 line-clamp-3 text-lg">
+                        <p className="text-gray-600 mb-6 line-clamp-3 text-lg" itemProp="description">
                           {markdownToPlainText(featuredPost.content).substring(0, 200)}...
                         </p>
                       )}
@@ -280,6 +380,7 @@ export default function Home() {
                         <Link 
                           to={`/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`}
                           className="inline-block px-6 py-3 bg-black text-white font-medium rounded hover:bg-gray-800 transition-colors"
+                          aria-label={`Read more about ${featuredPost.title}`}
                         >
                           Read More
                         </Link>
@@ -293,28 +394,41 @@ export default function Home() {
             {/* Two smaller posts (right side - 1/3 width) */}
             <div className="space-y-6">
               {latestPosts.slice(0, 2).map((post, index) => (
-                <article key={post._id} className="entry-tpl-tile g1-dark">
-                  {/* Featured Image */}
-                  <div className="entry-featured-media">
+                <article key={post._id} className="entry-tpl-tile g1-dark" 
+                  itemScope 
+                  itemType="https://schema.org/BlogPosting"
+                >
+                  {/* Featured Image with Structured Data */}
+                  <div className="entry-featured-media" itemScope itemType="https://schema.org/ImageObject">
                     <Link 
                       to={`/blog/${generateSlug(post.title)}?id=${post._id}`} 
                       className="g1-frame"
+                      itemProp="url"
                     >
                       <div className="g1-frame-inner">
                         {post.blogImage && (
                           <img
                             src={post.blogImage}
-                            alt={post.title}
+                            alt={`${post.title} - Image on SJWrites`}
                             className="w-full h-48 object-cover lazyloaded rounded-lg"
                             loading="lazy"
                             width="600"
                             height="320"
                             decoding="async"
+                            itemProp="contentUrl"
+                            data-indexable="true"
+                            data-article-id={post._id}
                           />
                         )}
                         <span className="g1-frame-icon"></span>
                       </div>
                     </Link>
+                    {/* Hidden structured data for the image */}
+                    <meta itemProp="name" content={post.title} />
+                    <meta itemProp="description" content={post.excerpt || markdownToPlainText(post.content).substring(0, 80)} />
+                    <meta itemProp="url" content={post.blogImage} />
+                    <meta itemProp="width" content="600" />
+                    <meta itemProp="height" content="320" />
                   </div>
 
                   {/* Content */}
@@ -330,6 +444,7 @@ export default function Home() {
                                 key={idx}
                                 href={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
                                 className="entry-category entry-category-item text-black hover:underline ml-1 text-sm"
+                                itemProp="keywords"
                               >
                                 {tag}{idx === 0 ? ',' : ''}
                               </a>
@@ -338,11 +453,12 @@ export default function Home() {
                         </span>
                       </div>
 
-                      {/* Title - Keep as h2 for secondary articles */}
-                      <h2 className="text-lg font-bold entry-title">
+                      {/* Title */}
+                      <h2 className="text-lg font-bold entry-title" itemProp="headline">
                         <Link 
                           to={`/blog/${generateSlug(post.title)}?id=${post._id}`}
                           className="text-gray-900 hover:text-black"
+                          itemProp="url"
                         >
                           {post.title}
                         </Link>
@@ -350,7 +466,7 @@ export default function Home() {
 
                       {/* Small stats */}
                       <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
-                        <span>
+                        <span itemProp="datePublished" content={post.createdAt}>
                           {new Date(post.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -358,10 +474,13 @@ export default function Home() {
                           })}
                         </span>
                         <span className="flex items-center gap-2">
-                          <span className="flex items-center">
+                          <span className="flex items-center" itemProp="interactionStatistic" itemScope itemType="https://schema.org/InteractionCounter">
+                            <meta itemProp="interactionType" content="https://schema.org/LikeAction" />
+                            <meta itemProp="userInteractionCount" content={post.likes || 0} />
                             ❤️ {post.likes || 0}
                           </span>
                           <span className="flex items-center ml-2">
+                            <meta itemProp="commentCount" content={post.comments?.length || 0} />
                             💬 {post.comments?.length || 0}
                           </span>
                         </span>
@@ -381,28 +500,41 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {getNextThreePosts().map((post, index) => (
-                <article key={post._id} className="entry-tpl-tile g1-dark">
-                  {/* Featured Image */}
-                  <div className="entry-featured-media">
+                <article key={post._id} className="entry-tpl-tile g1-dark" 
+                  itemScope 
+                  itemType="https://schema.org/BlogPosting"
+                >
+                  {/* Featured Image with Structured Data */}
+                  <div className="entry-featured-media" itemScope itemType="https://schema.org/ImageObject">
                     <Link 
                       to={`/blog/${generateSlug(post.title)}?id=${post._id}`} 
                       className="g1-frame"
+                      itemProp="url"
                     >
                       <div className="g1-frame-inner">
                         {post.blogImage && (
                           <img
                             src={post.blogImage}
-                            alt={post.title}
+                            alt={`${post.title} - Image on SJWrites`}
                             className="w-full h-56 object-cover lazyloaded rounded-lg"
                             loading="lazy"
                             width="800"
                             height="450"
                             decoding="async"
+                            itemProp="contentUrl"
+                            data-indexable="true"
+                            data-article-id={post._id}
                           />
                         )}
                         <span className="g1-frame-icon"></span>
                       </div>
                     </Link>
+                    {/* Hidden structured data for the image */}
+                    <meta itemProp="name" content={post.title} />
+                    <meta itemProp="description" content={post.excerpt || markdownToPlainText(post.content).substring(0, 80)} />
+                    <meta itemProp="url" content={post.blogImage} />
+                    <meta itemProp="width" content="800" />
+                    <meta itemProp="height" content="450" />
                   </div>
 
                   {/* Content */}
@@ -418,6 +550,7 @@ export default function Home() {
                                 key={idx}
                                 href={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
                                 className="entry-category entry-category-item text-black hover:underline ml-1 text-sm"
+                                itemProp="keywords"
                               >
                                 {tag}{idx === 0 ? ',' : ''}
                               </a>
@@ -426,11 +559,12 @@ export default function Home() {
                         </span>
                       </div>
 
-                      {/* Title - Keep as h2 for consistency */}
-                      <h2 className="text-xl font-bold entry-title mb-3">
+                      {/* Title */}
+                      <h2 className="text-xl font-bold entry-title mb-3" itemProp="headline">
                         <Link 
                           to={`/blog/${generateSlug(post.title)}?id=${post._id}`}
                           className="text-gray-900 hover:text-black"
+                          itemProp="url"
                         >
                           {post.title}
                         </Link>
@@ -438,14 +572,14 @@ export default function Home() {
 
                       {/* Excerpt */}
                       {post.content && (
-                        <p className="text-gray-600 mb-4 line-clamp-2">
+                        <p className="text-gray-600 mb-4 line-clamp-2" itemProp="description">
                           {markdownToPlainText(post.content).substring(0, 120)}...
                         </p>
                       )}
 
                       {/* Small stats */}
                       <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
-                        <span>
+                        <span itemProp="datePublished" content={post.createdAt}>
                           {new Date(post.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
@@ -453,10 +587,13 @@ export default function Home() {
                           })}
                         </span>
                         <span className="flex items-center gap-2">
-                          <span className="flex items-center">
+                          <span className="flex items-center" itemProp="interactionStatistic" itemScope itemType="https://schema.org/InteractionCounter">
+                            <meta itemProp="interactionType" content="https://schema.org/LikeAction" />
+                            <meta itemProp="userInteractionCount" content={post.likes || 0} />
                             ❤️ {post.likes || 0}
                           </span>
                           <span className="flex items-center ml-2">
+                            <meta itemProp="commentCount" content={post.comments?.length || 0} />
                             💬 {post.comments?.length || 0}
                           </span>
                         </span>
