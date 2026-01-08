@@ -170,7 +170,7 @@ export default function BlogCard({ blog, size = 'normal', showExcerpt = true }) 
             </div>
           )}
 
-          {/* Small stats for normal/small cards (date only; likes/comments removed) */}
+a          {/* Small stats for normal/small cards (date only; likes/comments removed) */}
           {(size === 'normal' || size === 'small') && (
             <div className="flex items-center justify-start text-sm text-gray-500 mt-3">
               <span>{formatDate(blog.createdAt)}</span>
