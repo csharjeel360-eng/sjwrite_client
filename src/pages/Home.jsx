@@ -464,25 +464,14 @@ export default function Home() {
                         </Link>
                       </h2>
 
-                      {/* Small stats */}
-                      <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
+                      {/* Small stats (date only) */}
+                      <div className="flex items-center justify-start text-sm text-gray-500 mt-3">
                         <span itemProp="datePublished" content={post.createdAt}>
                           {new Date(post.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric'
                           })}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <span className="flex items-center" itemProp="interactionStatistic" itemScope itemType="https://schema.org/InteractionCounter">
-                            <meta itemProp="interactionType" content="https://schema.org/LikeAction" />
-                            <meta itemProp="userInteractionCount" content={post.likes || 0} />
-                            ❤️ {post.likes || 0}
-                          </span>
-                          <span className="flex items-center ml-2">
-                            <meta itemProp="commentCount" content={post.comments?.length || 0} />
-                            💬 {post.comments?.length || 0}
-                          </span>
                         </span>
                       </div>
                     </header>
@@ -577,25 +566,14 @@ export default function Home() {
                         </p>
                       )}
 
-                      {/* Small stats */}
-                      <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
+                      {/* Small stats (date only) */}
+                      <div className="flex items-center justify-start text-sm text-gray-500 mt-3">
                         <span itemProp="datePublished" content={post.createdAt}>
                           {new Date(post.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric'
                           })}
-                        </span>
-                        <span className="flex items-center gap-2">
-                          <span className="flex items-center" itemProp="interactionStatistic" itemScope itemType="https://schema.org/InteractionCounter">
-                            <meta itemProp="interactionType" content="https://schema.org/LikeAction" />
-                            <meta itemProp="userInteractionCount" content={post.likes || 0} />
-                            ❤️ {post.likes || 0}
-                          </span>
-                          <span className="flex items-center ml-2">
-                            <meta itemProp="commentCount" content={post.comments?.length || 0} />
-                            💬 {post.comments?.length || 0}
-                          </span>
                         </span>
                       </div>
                     </header>

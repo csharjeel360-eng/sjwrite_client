@@ -170,18 +170,10 @@ export default function BlogCard({ blog, size = 'normal', showExcerpt = true }) 
             </div>
           )}
 
-          {/* Small stats for normal/small cards */}
+          {/* Small stats for normal/small cards (date only; likes/comments removed) */}
           {(size === 'normal' || size === 'small') && (
-            <div className="flex items-center justify-between text-sm text-gray-500 mt-3">
+            <div className="flex items-center justify-start text-sm text-gray-500 mt-3">
               <span>{formatDate(blog.createdAt)}</span>
-              <span className="flex items-center gap-2">
-                <span className="flex items-center">
-                  ❤️ {blog.likes || 0}
-                </span>
-                <span className="flex items-center ml-2">
-                  💬 {blog.comments?.length || 0}
-                </span>
-              </span>
             </div>
           )}
         </header>
