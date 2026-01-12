@@ -106,31 +106,50 @@ export default function Home() {
     return sortedByDate.slice(3, 6);
   };
 
-  // Generate structured data for all blog images
-  const generateImageStructuredData = () => {
-    const blogPosts = allPosts.slice(0, 10); // Limit to first 10 posts for homepage
-    const images = [];
+  // Generate homepage breadcrumb schema
+  const generateBreadcrumbSchema = () => {
+    return {
+      "@context": "https://schema.org",
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://sjwrites.com"
+        }
+      ]
+    };
+  };
+
+  // Generate lightweight ItemList schema for homepage
+  const generateItemListSchema = () => {
+    const recentPosts = allPosts.slice(0, 10); // Show first 10 posts
     
-    blogPosts.forEach(post => {
-      if (post.blogImage) {
-        images.push({
-          "@type": "ImageObject",
-          "url": post.blogImage,
-          "name": post.title,
-          "description": post.excerpt || markdownToPlainText(post.content).substring(0, 100),
-          "caption": post.title,
-          "contentUrl": post.blogImage,
-          "thumbnailUrl": post.blogImage,
-          "associatedArticle": {
-            "@type": "BlogPosting",
-            "headline": post.title,
-            "url": `https://sjwrites.com/blog/${generateSlug(post.title)}?id=${post._id}`
+    return {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Latest Blog Posts",
+      "description": "Recent entertaining and trending stories from SJWrites",
+      "url": "https://sjwrites.com",
+      "numberOfItems": recentPosts.length,
+      "itemListElement": recentPosts.map((post, index) => ({
+        "@type": "ListItem",
+        "position": index + 1,
+        "item": {
+          "@type": "BlogPosting",
+          "headline": post.title,
+          "url": `https://sjwrites.com/${generateSlug(post.title)}`,
+          "image": post.blogImage,
+          "datePublished": post.createdAt,
+          "dateModified": post.updatedAt || post.createdAt,
+          "author": {
+            "@type": "Person",
+            "name": post.author || "SJWrites"
           }
-        });
-      }
-    });
-    
-    return images;
+        }
+      }))
+    };
   };
 
   if (loading) {
@@ -138,6 +157,7 @@ export default function Home() {
       <div className="min-h-screen bg-white">
         <Helmet>
           <title>Loading - SJWrites</title>
+          <link rel="canonical" href="https://sjwrites.com" />
         </Helmet>
         <div className="max-w-7xl mx-auto px-4 py-8">
           <div className="animate-pulse">
@@ -156,29 +176,29 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-white">
       <Helmet>
-        {/* 🚀 CRITICAL SEO FIX: Add Canonical Tag */}
+        {/* 🟢 CRITICAL: Homepage canonical */}
         <link rel="canonical" href="https://sjwrites.com" />
         
+        {/* 🟢 Homepage title & description */}
         <title>SJWrites - Entertaining & Trending Stories and Much More</title>
-        <meta name="description" content="SJWrites - Entertaining & Trending Stories, Fun Videos, Celebrity News and Photos is a one stop shop for all your entertainment news." />
+        <meta name="description" content="Explore the latest tech blogs on SJWrites featuring AI, apps, software, gadgets, and digital innovation." />
         
-        {/* 🚀 SEO FIX: Add Social Meta Tags for better sharing */}
+        {/* 🟢 Open Graph for homepage */}
         <meta property="og:title" content="SJWrites - Entertaining & Trending Stories and Much More" />
         <meta property="og:description" content="Your one-stop shop for entertainment news, stories, videos, and more." />
         <meta property="og:image" content={featuredPost?.blogImage || "https://sjwrites.com/default-og.jpg"} />
         <meta property="og:url" content="https://sjwrites.com" />
         <meta property="og:type" content="website" />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="675" />
-        <meta property="og:image:alt" content="SJWrites - Featured Content" />
+        <meta property="og:site_name" content="SJWrites" />
+        <meta property="og:locale" content="en_US" />
         
+        {/* 🟢 Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="SJWrites - Entertaining & Trending Stories" />
         <meta name="twitter:description" content="Your one-stop shop for entertainment news" />
         <meta name="twitter:image" content={featuredPost?.blogImage || "https://sjwrites.com/default-og.jpg"} />
-        <meta name="twitter:image:alt" content="SJWrites - Featured Content" />
         
-        {/* 🚀 SEO FIX: Add Website Schema Markup */}
+        {/* 🟢 Website Schema - ESSENTIAL for homepage */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -205,7 +225,7 @@ export default function Home() {
           })}
         </script>
         
-        {/* 🚀 NEW: Add CollectionPage Schema for homepage with images */}
+        {/* 🟢 CollectionPage Schema - Lightweight for homepage */}
         <script type="application/ld+json">
           {JSON.stringify({
             "@context": "https://schema.org",
@@ -213,40 +233,27 @@ export default function Home() {
             "name": "Latest Blog Posts - SJWrites",
             "description": "Latest entertaining and trending stories from SJWrites",
             "url": "https://sjwrites.com",
-            "hasPart": allPosts.slice(0, 5).map(post => ({
-              "@type": "BlogPosting",
-              "headline": post.title,
-              "description": post.excerpt || markdownToPlainText(post.content).substring(0, 150),
-              "image": post.blogImage,
-              "url": `https://sjwrites.com/blog/${generateSlug(post.title)}?id=${post._id}`,
-              "datePublished": post.createdAt,
-              "dateModified": post.updatedAt || post.createdAt
-            }))
+            "mainEntity": {
+              "@type": "ItemList",
+              "numberOfItems": Math.min(allPosts.length, 10),
+              "itemListElement": allPosts.slice(0, 10).map((post, index) => ({
+                "@type": "ListItem",
+                "position": index + 1,
+                "url": `https://sjwrites.com/${generateSlug(post.title)}`
+              }))
+            }
           })}
         </script>
         
-        {/* 🚀 NEW: Image Object Schema for featured images */}
-        {featuredPost?.blogImage && (
-          <script type="application/ld+json">
-            {JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "ImageObject",
-              "url": featuredPost.blogImage,
-              "name": featuredPost.title,
-              "description": featuredPost.excerpt || markdownToPlainText(featuredPost.content).substring(0, 100),
-              "caption": `Featured: ${featuredPost.title}`,
-              "contentUrl": featuredPost.blogImage,
-              "thumbnailUrl": featuredPost.blogImage,
-              "associatedArticle": {
-                "@type": "BlogPosting",
-                "headline": featuredPost.title,
-                "url": `https://sjwrites.com/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`
-              },
-              "width": "1200",
-              "height": "675"
-            })}
-          </script>
-        )}
+        {/* 🟢 Breadcrumb Schema */}
+        <script type="application/ld+json">
+          {JSON.stringify(generateBreadcrumbSchema())}
+        </script>
+        
+        {/* 🟢 ItemList Schema for better indexing */}
+        <script type="application/ld+json">
+          {JSON.stringify(generateItemListSchema())}
+        </script>
         
         {/* Performance hints */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -256,10 +263,10 @@ export default function Home() {
         )}
       </Helmet>
 
-      {/* 🚀 SEO FIX: Add H1 Heading at the top of the page (invisible but for SEO) */}
-      <h1 className="sr-only">SJWrites - Entertaining & Trending Stories, Fun Videos, Celebrity News and Photos</h1>
+      {/* 🟢 H1 for homepage (hidden visually but accessible) */}
+      <h1 className="sr-only">Explore the latest tech blogs on SJWrites featuring AI, apps, software, gadgets, and digital innovation</h1>
 
-      {/* Search Results (shown when user types in navbar) */}
+      {/* Search Results Section */}
       {searchQuery !== '' && (
         <section className="py-8 bg-gray-50">
           <div className="max-w-7xl mx-auto px-4">
@@ -275,7 +282,13 @@ export default function Home() {
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {searchResults.map(post => (
-                  <BlogCard key={post._id} blog={post} size="normal" showExcerpt={true} />
+                  <BlogCard 
+                    key={post._id} 
+                    blog={post} 
+                    size="normal" 
+                    showExcerpt={true}
+                    cleanUrl={true} // Pass prop to use clean URLs
+                  />
                 ))}
               </div>
             )}
@@ -283,27 +296,23 @@ export default function Home() {
         </section>
       )}
 
-      {/* Featured Section with Big Image */}
+      {/* Featured Section */}
       <section className="py-8">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-2xl font-bold mb-6 text-gray-900">FRESH</h2>
           
-          {/* Neemopani-style mosaic layout - First 3 posts */}
+          {/* Featured layout */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Large featured post (left side - 2/3 width) */}
+            {/* Large featured post */}
             {featuredPost && (
               <div className="lg:col-span-2">
-                <article className="entry-tpl-tile entry-tpl-tile-xl g1-dark" 
-                  itemScope 
-                  itemType="https://schema.org/BlogPosting"
-                  itemProp="hasPart"
-                >
-                  {/* Featured Image with Structured Data */}
-                  <div className="entry-featured-media" itemScope itemType="https://schema.org/ImageObject">
+                <article className="entry-tpl-tile entry-tpl-tile-xl g1-dark">
+                  {/* Featured Image */}
+                  <div className="entry-featured-media">
                     <Link 
-                      to={`/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`} 
+                      to={`/${generateSlug(featuredPost.title)}`} // 🟢 CLEAN URL
                       className="g1-frame"
-                      itemProp="url"
+                      aria-label={`Read: ${featuredPost.title}`}
                     >
                       <div className="g1-frame-inner">
                         {featuredPost.blogImage && (
@@ -312,27 +321,13 @@ export default function Home() {
                             alt={`${featuredPost.title} - Featured image on SJWrites`}
                             className="w-full h-96 object-cover lazyloaded rounded-lg"
                             loading="eager"
-                            fetchpriority="high"
                             width="1200"
                             height="675"
                             decoding="async"
-                            itemProp="contentUrl"
-                            data-image="primary"
-                            // 🚀 NEW: These attributes help Google index the image
-                            data-indexable="true"
-                            data-article-id={featuredPost._id}
                           />
                         )}
-                        <span className="g1-frame-icon"></span>
                       </div>
                     </Link>
-                    {/* Hidden structured data for the image */}
-                    <meta itemProp="name" content={featuredPost.title} />
-                    <meta itemProp="description" content={featuredPost.excerpt || markdownToPlainText(featuredPost.content).substring(0, 100)} />
-                    <meta itemProp="url" content={featuredPost.blogImage} />
-                    <meta itemProp="width" content="1200" />
-                    <meta itemProp="height" content="675" />
-                    <meta itemProp="caption" content={`Featured image for: ${featuredPost.title}`} />
                   </div>
 
                   {/* Content */}
@@ -344,33 +339,31 @@ export default function Home() {
                           <span className="entry-categories-inner">
                             <span className="entry-categories-label text-sm text-gray-500">in</span>
                             {featuredPost.tags && featuredPost.tags.slice(0, 2).map((tag, idx) => (
-                              <a 
+                              <Link 
                                 key={idx}
-                                href={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+                                to={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
                                 className="entry-category entry-category-item text-black hover:underline ml-1"
-                                itemProp="keywords"
                               >
                                 {tag}{idx === 0 ? ',' : ''}
-                              </a>
+                              </Link>
                             ))}
                           </span>
                         </span>
                       </div>
 
                       {/* Title */}
-                      <h1 className="text-2xl md:text-3xl font-bold entry-title mb-4" itemProp="headline">
+                      <h2 className="text-2xl md:text-3xl font-bold entry-title mb-4">
                         <Link 
-                          to={`/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`}
+                          to={`/${generateSlug(featuredPost.title)}`} // 🟢 CLEAN URL
                           className="text-gray-900 hover:text-black"
-                          itemProp="url"
                         >
                           {featuredPost.title}
                         </Link>
-                      </h1>
+                      </h2>
 
                       {/* Excerpt */}
                       {featuredPost.content && (
-                        <p className="text-gray-600 mb-6 line-clamp-3 text-lg" itemProp="description">
+                        <p className="text-gray-600 mb-6 line-clamp-3 text-lg">
                           {markdownToPlainText(featuredPost.content).substring(0, 200)}...
                         </p>
                       )}
@@ -378,7 +371,7 @@ export default function Home() {
                       {/* Read More Button */}
                       <div className="entry-ctas">
                         <Link 
-                          to={`/blog/${generateSlug(featuredPost.title)}?id=${featuredPost._id}`}
+                          to={`/${generateSlug(featuredPost.title)}`} // 🟢 CLEAN URL
                           className="inline-block px-6 py-3 bg-black text-white font-medium rounded hover:bg-gray-800 transition-colors"
                           aria-label={`Read more about ${featuredPost.title}`}
                         >
@@ -391,19 +384,16 @@ export default function Home() {
               </div>
             )}
             
-            {/* Two smaller posts (right side - 1/3 width) */}
+            {/* Two smaller posts */}
             <div className="space-y-6">
               {latestPosts.slice(0, 2).map((post, index) => (
-                <article key={post._id} className="entry-tpl-tile g1-dark" 
-                  itemScope 
-                  itemType="https://schema.org/BlogPosting"
-                >
-                  {/* Featured Image with Structured Data */}
-                  <div className="entry-featured-media" itemScope itemType="https://schema.org/ImageObject">
+                <article key={post._id} className="entry-tpl-tile g1-dark">
+                  {/* Featured Image */}
+                  <div className="entry-featured-media">
                     <Link 
-                      to={`/blog/${generateSlug(post.title)}?id=${post._id}`} 
+                      to={`/${generateSlug(post.title)}`} // 🟢 CLEAN URL
                       className="g1-frame"
-                      itemProp="url"
+                      aria-label={`Read: ${post.title}`}
                     >
                       <div className="g1-frame-inner">
                         {post.blogImage && (
@@ -415,20 +405,10 @@ export default function Home() {
                             width="600"
                             height="320"
                             decoding="async"
-                            itemProp="contentUrl"
-                            data-indexable="true"
-                            data-article-id={post._id}
                           />
                         )}
-                        <span className="g1-frame-icon"></span>
                       </div>
                     </Link>
-                    {/* Hidden structured data for the image */}
-                    <meta itemProp="name" content={post.title} />
-                    <meta itemProp="description" content={post.excerpt || markdownToPlainText(post.content).substring(0, 80)} />
-                    <meta itemProp="url" content={post.blogImage} />
-                    <meta itemProp="width" content="600" />
-                    <meta itemProp="height" content="320" />
                   </div>
 
                   {/* Content */}
@@ -440,39 +420,37 @@ export default function Home() {
                           <span className="entry-categories-inner">
                             <span className="entry-categories-label text-sm text-gray-500">in</span>
                             {post.tags && post.tags.slice(0, 2).map((tag, idx) => (
-                              <a 
+                              <Link 
                                 key={idx}
-                                href={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+                                to={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
                                 className="entry-category entry-category-item text-black hover:underline ml-1 text-sm"
-                                itemProp="keywords"
                               >
                                 {tag}{idx === 0 ? ',' : ''}
-                              </a>
+                              </Link>
                             ))}
                           </span>
                         </span>
                       </div>
 
                       {/* Title */}
-                      <h2 className="text-lg font-bold entry-title" itemProp="headline">
+                      <h3 className="text-lg font-bold entry-title">
                         <Link 
-                          to={`/blog/${generateSlug(post.title)}?id=${post._id}`}
+                          to={`/${generateSlug(post.title)}`} // 🟢 CLEAN URL
                           className="text-gray-900 hover:text-black"
-                          itemProp="url"
                         >
                           {post.title}
                         </Link>
-                      </h2>
+                      </h3>
 
-                      {/* Small stats (date only) */}
+                      {/* Date */}
                       <div className="flex items-center justify-start text-sm text-gray-500 mt-3">
-                        <span itemProp="datePublished" content={post.createdAt}>
+                        <time dateTime={post.createdAt}>
                           {new Date(post.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric'
                           })}
-                        </span>
+                        </time>
                       </div>
                     </header>
                   </div>
@@ -489,16 +467,13 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {getNextThreePosts().map((post, index) => (
-                <article key={post._id} className="entry-tpl-tile g1-dark" 
-                  itemScope 
-                  itemType="https://schema.org/BlogPosting"
-                >
-                  {/* Featured Image with Structured Data */}
-                  <div className="entry-featured-media" itemScope itemType="https://schema.org/ImageObject">
+                <article key={post._id} className="entry-tpl-tile g1-dark">
+                  {/* Featured Image */}
+                  <div className="entry-featured-media">
                     <Link 
-                      to={`/blog/${generateSlug(post.title)}?id=${post._id}`} 
+                      to={`/${generateSlug(post.title)}`} // 🟢 CLEAN URL
                       className="g1-frame"
-                      itemProp="url"
+                      aria-label={`Read: ${post.title}`}
                     >
                       <div className="g1-frame-inner">
                         {post.blogImage && (
@@ -510,20 +485,10 @@ export default function Home() {
                             width="800"
                             height="450"
                             decoding="async"
-                            itemProp="contentUrl"
-                            data-indexable="true"
-                            data-article-id={post._id}
                           />
                         )}
-                        <span className="g1-frame-icon"></span>
                       </div>
                     </Link>
-                    {/* Hidden structured data for the image */}
-                    <meta itemProp="name" content={post.title} />
-                    <meta itemProp="description" content={post.excerpt || markdownToPlainText(post.content).substring(0, 80)} />
-                    <meta itemProp="url" content={post.blogImage} />
-                    <meta itemProp="width" content="800" />
-                    <meta itemProp="height" content="450" />
                   </div>
 
                   {/* Content */}
@@ -535,46 +500,44 @@ export default function Home() {
                           <span className="entry-categories-inner">
                             <span className="entry-categories-label text-sm text-gray-500">in</span>
                             {post.tags && post.tags.slice(0, 2).map((tag, idx) => (
-                              <a 
+                              <Link 
                                 key={idx}
-                                href={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+                                to={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
                                 className="entry-category entry-category-item text-black hover:underline ml-1 text-sm"
-                                itemProp="keywords"
                               >
                                 {tag}{idx === 0 ? ',' : ''}
-                              </a>
+                              </Link>
                             ))}
                           </span>
                         </span>
                       </div>
 
                       {/* Title */}
-                      <h2 className="text-xl font-bold entry-title mb-3" itemProp="headline">
+                      <h3 className="text-xl font-bold entry-title mb-3">
                         <Link 
-                          to={`/blog/${generateSlug(post.title)}?id=${post._id}`}
+                          to={`/${generateSlug(post.title)}`} // 🟢 CLEAN URL
                           className="text-gray-900 hover:text-black"
-                          itemProp="url"
                         >
                           {post.title}
                         </Link>
-                      </h2>
+                      </h3>
 
                       {/* Excerpt */}
                       {post.content && (
-                        <p className="text-gray-600 mb-4 line-clamp-2" itemProp="description">
+                        <p className="text-gray-600 mb-4 line-clamp-2">
                           {markdownToPlainText(post.content).substring(0, 120)}...
                         </p>
                       )}
 
-                      {/* Small stats (date only) */}
+                      {/* Date */}
                       <div className="flex items-center justify-start text-sm text-gray-500 mt-3">
-                        <span itemProp="datePublished" content={post.createdAt}>
+                        <time dateTime={post.createdAt}>
                           {new Date(post.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric'
                           })}
-                        </span>
+                        </time>
                       </div>
                     </header>
                   </div>
@@ -591,16 +554,23 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {allPosts.slice(6, 6 + page * postsPerPage).map((post) => (
-                <BlogCard key={post._id} blog={post} size="normal" showExcerpt={true} />
+                <BlogCard 
+                  key={post._id} 
+                  blog={post} 
+                  size="normal" 
+                  showExcerpt={true}
+                  cleanUrl={true} // Pass prop to use clean URLs
+                />
               ))}
             </div>
 
-            {/* Load More Button for additional posts */}
+            {/* Load More Button */}
             {6 + page * postsPerPage < allPosts.length && (
               <div className="text-center mt-12">
                 <button
                   onClick={() => setPage(p => p + 1)}
                   className="inline-block px-8 py-3 bg-black text-white font-medium hover:bg-gray-800 transition-colors"
+                  aria-label="Load more blog posts"
                 >
                   Load more
                 </button>

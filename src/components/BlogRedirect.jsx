@@ -2,7 +2,16 @@
 import { useEffect, useState } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import { api } from '../api/client';
-import { generateSlug } from './BlogCard';
+
+const generateSlug = (title) => {
+  if (!title) return '';
+  return title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .trim();
+};
 
 export default function BlogRedirect() {
   const { id } = useParams();
@@ -31,7 +40,7 @@ export default function BlogRedirect() {
   if (loading) return <div>Redirecting...</div>;
   
   if (slug) {
-    return <Navigate to={`/blog/${slug}`} replace />;
+    return <Navigate to={`/${slug}`} replace />;
   }
 
   return <Navigate to="/blogs" replace />;

@@ -4,6 +4,9 @@ import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import BlogDetail from './pages/BlogDetail';
+import Blogs from './pages/Blogs';
+import HotBlogs from './pages/HotBlogs';
+import Trending from './pages/Trending';
 import AuthorPage from './pages/AutherPages';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
@@ -64,8 +67,8 @@ function BlogIdRedirect() {
         const blogData = await api.getBlog(id);
         setBlog(blogData);
         const slug = generateSlug(blogData.title);
-        // Replace the current URL with the new slug-based URL
-        window.location.replace(`/blog/${slug}?id=${id}`);
+        // Replace the current URL with the new slug-based URL (root path)
+        window.location.replace(`/${slug}?id=${id}`);
       } catch (error) {
         console.error('Error fetching blog for redirect:', error);
         // If error, redirect to blogs page
@@ -116,6 +119,24 @@ export default function App() {
             <BlogDetail />
           </>
         } />
+        {/* Blogs collection (posts tagged 'blog') */}
+        <Route path="/blog" element={
+          <>
+            <Blogs />
+          </>
+        } />
+        <Route path="/blog/trending" element={
+          <>
+            <PageTitle title="Trending Blogs" />
+            <Trending />
+          </>
+        } />
+        <Route path="/blog/hot" element={
+          <>
+            <PageTitle title="Hot Blogs" />
+            <HotBlogs />
+          </>
+        } />
         <Route path="/author/:id" element={
           <>
             <PageTitle title="Author" />
@@ -164,7 +185,14 @@ export default function App() {
         
         {/* Redirect old ID-based URLs to new slug-based URLs */}
         <Route path="/blog/:id" element={<BlogIdRedirect />} />
-        
+
+        {/* Support root-path slugs for blog detail (clean URLs without /blog) */}
+        <Route path="/:slug" element={
+          <>
+            <BlogDetail />
+          </>
+        } />
+
         {/* Catch all route - redirect to home for any unknown paths */}
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>

@@ -1,11 +1,14 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 export default function Navbar({ onSearch }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isBlogSubOpen, setIsBlogSubOpen] = useState(false);
+  const [isBlogHover, setIsBlogHover] = useState(false);
+  const blogHoverTimer = useRef(null);
   const navigate = useNavigate();
 
   // Check if admin is logged in
@@ -96,14 +99,39 @@ export default function Navbar({ onSearch }) {
                 Home
               </NavLink>
 
-              <NavLink 
-                to="/blogs" 
-                className={({isActive}) => 
-                  isActive ? 'text-black font-medium' : 'text-gray-700 hover:text-black'
-                }
+              <div
+                className="relative"
+                onMouseEnter={() => {
+                  if (blogHoverTimer.current) { clearTimeout(blogHoverTimer.current); blogHoverTimer.current = null; }
+                  setIsBlogHover(true);
+                }}
+                onMouseLeave={() => {
+                  // small delay to prevent flicker when moving to menu
+                  blogHoverTimer.current = setTimeout(() => setIsBlogHover(false), 150);
+                }}
               >
-                Blogs
-              </NavLink>
+                <NavLink 
+                  to="/blog" 
+                  onFocus={() => { if (blogHoverTimer.current) { clearTimeout(blogHoverTimer.current); blogHoverTimer.current = null; } setIsBlogHover(true); }}
+                  onBlur={() => { blogHoverTimer.current = setTimeout(() => setIsBlogHover(false), 150); }}
+                  className={({isActive}) => 
+                    (isActive ? 'text-black font-medium' : 'text-gray-700 hover:text-black') + ' inline-block'
+                  }
+                >
+                  Blogs
+                </NavLink>
+
+                {/* Dropdown on hover for blog sub-links (desktop only) - uses state to avoid flicker */}
+                <div className={`${isBlogHover ? 'block' : 'hidden'} absolute left-0 top-full mt-1 w-44 bg-white rounded-md shadow-lg py-2 z-50`}>
+                  <NavLink to="/" className={({isActive}) => isActive ? 'block px-4 py-2 text-sm text-black bg-gray-100' : 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50'}>Latest</NavLink>
+                  <NavLink to="/blog/trending" className={({isActive}) => isActive ? 'block px-4 py-2 text-sm text-black bg-gray-100' : 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50'}>Trending</NavLink>
+                  <NavLink to="/blog/hot" className={({isActive}) => isActive ? 'block px-4 py-2 text-sm text-black bg-gray-100' : 'block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50'}>Hot</NavLink>
+                </div>
+              </div>
+
+
+
+ 
 
               <NavLink 
                 to="/about" 
@@ -279,6 +307,8 @@ export default function Navbar({ onSearch }) {
           </div>
         </div>
 
+        
+
         {/* Mobile Navigation Menu (includes search on mobile) */}
         {isMenuOpen && (
           <div className="md:hidden mt-4 pb-2 space-y-3">
@@ -329,15 +359,44 @@ export default function Navbar({ onSearch }) {
             >
               Home
             </NavLink>
-            <NavLink 
-              to="/blogs" 
-              className={({isActive}) => 
-                `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`
-              }
-              onClick={() => setIsMenuOpen(false)}
-            >
-              Blogs
-            </NavLink>
+            {/* Mobile Blogs dropdown: label navigates to /blogs, chevron toggles submenu */}
+            <div>
+              <div className="flex items-center justify-between">
+                <NavLink
+                  to="/blog"
+                  className={({isActive}) => `w-full text-left py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`}
+                  onClick={() => { setIsMenuOpen(false); setIsBlogSubOpen(false); }}
+                >
+                  Blogs
+                </NavLink>
+
+                <button
+                  type="button"
+                  aria-expanded={isBlogSubOpen}
+                  onClick={() => setIsBlogSubOpen(v => !v)}
+                  className="p-2 text-gray-700 hover:bg-gray-100 rounded-md ml-1"
+                  aria-label={isBlogSubOpen ? 'Collapse blog submenu' : 'Expand blog submenu'}
+                >
+                  <svg className={`w-4 h-4 transform ${isBlogSubOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+
+              {isBlogSubOpen && (
+                <div className="pl-4">
+                  <NavLink to="/" className={({isActive}) => `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => { setIsMenuOpen(false); setIsBlogSubOpen(false); }}>
+                    Latest
+                  </NavLink>
+                  <NavLink to="/blog/trending" className={({isActive}) => `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => { setIsMenuOpen(false); setIsBlogSubOpen(false); }}>
+                    Trending
+                  </NavLink>
+                  <NavLink to="/blog/hot" className={({isActive}) => `block py-2 px-4 rounded-md ${isActive ? 'bg-gray-100 text-black font-medium' : 'text-gray-700 hover:bg-gray-100'}`} onClick={() => { setIsMenuOpen(false); setIsBlogSubOpen(false); }}>
+                    Hot
+                  </NavLink>
+                </div>
+              )}
+            </div>
             <NavLink 
               to="/about" 
               className={({isActive}) => 

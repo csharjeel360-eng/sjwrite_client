@@ -41,6 +41,16 @@ const markdownToPlainText = (markdown) => {
 export default function FeaturedPost({ post, index }) {
   const [plainTextPreview, setPlainTextPreview] = useState('');
 
+  const generateSlug = (title) => {
+    if (!title) return '';
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  };
+
   useEffect(() => {
     // Create a plain text preview for the excerpt
     const plainText = markdownToPlainText(post.content);
@@ -75,7 +85,7 @@ export default function FeaturedPost({ post, index }) {
         </div>
         
         <h3 className="text-xl font-bold text-gray-900 mb-3 line-clamp-2 group-hover:text-black transition-colors">
-          <Link to={`/blog/${post._id}`}>
+          <Link to={`/${generateSlug(post.title)}`}>
             {post.title}
           </Link>
         </h3>
@@ -88,7 +98,7 @@ export default function FeaturedPost({ post, index }) {
         />
         
         <Link 
-          to={`/blog/${post._id}`}
+          to={`/${generateSlug(post.title)}`}
           className="inline-flex items-center text-black font-medium hover:text-gray-800 transition-colors group/readmore"
         >
           Read more

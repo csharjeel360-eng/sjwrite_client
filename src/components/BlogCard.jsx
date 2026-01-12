@@ -1,183 +1,106 @@
+// components/BlogCard.jsx
+import React from 'react';
 import { Link } from 'react-router-dom';
-import { api } from '../api/client';
-import { useNavigate } from 'react-router-dom';
 
-// Helper function to generate URL-friendly slug
-const generateSlug = (title) => {
-  if (!title) return '';
-  return title
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim();
-};
-
-export default function BlogCard({ blog, size = 'normal', showExcerpt = true }) {
-  const navigate = useNavigate();
-
-  const handleReadMore = async (e) => {
-    e.preventDefault();
-    await api.incrementView(blog._id);
-    const slug = generateSlug(blog.title);
-    navigate(`/blog/${slug}?id=${blog._id}`);
+const BlogCard = ({ blog, size = 'normal', showExcerpt = false, cleanUrl = false }) => {
+  const generateSlug = (title) => {
+    if (!title) return '';
+    return title
+      .toLowerCase()
+      .replace(/[^\w\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
   };
 
-  const formatDate = (date) => {
-    const now = new Date();
-    const postDate = new Date(date);
-    const diffTime = Math.abs(now - postDate);
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-    
-    if (diffDays === 0) return 'Today';
-    if (diffDays === 1) return 'Yesterday';
-    if (diffDays < 7) return `${diffDays} days ago`;
-    if (diffDays < 30) return `${Math.floor(diffDays / 7)} weeks ago`;
-    if (diffDays < 365) return `${Math.floor(diffDays / 30)} months ago`;
-    return `${Math.floor(diffDays / 365)} years ago`;
+  // 🟢 Clean URL generation (root path slug, no /blog prefix)
+  const blogUrl = cleanUrl
+    ? `/${generateSlug(blog.title)}`
+    : `/${generateSlug(blog.title)}?id=${blog._id}`;
+
+  const markdownToPlainText = (markdown) => {
+    if (!markdown) return '';
+    return markdown
+      .replace(/<[^>]*>/g, '')
+      .replace(/\*\*(.*?)\*\*/g, '$1')
+      .replace(/_(.*?)_/g, '$1')
+      .replace(/#{1,6}\s?(.*?)(\n|$)/g, '$1')
+      .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+      .replace(/\n/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
   };
 
-  const getCategoryDisplay = (categories) => {
-    if (!categories || !Array.isArray(categories)) return null;
-    return categories.slice(0, 2).map((cat, idx) => (
-      <a 
-        key={idx} 
-        href={`/category/${cat.toLowerCase().replace(/\s+/g, '-')}`}
-        className="entry-category entry-category-item"
-      >
-        {cat}
-      </a>
-    ));
-  };
-
-  const getImageSize = () => {
-    switch(size) {
-      case 'large':
-        return 'h-96';
-      case 'medium':
-        return 'h-64';
-      case 'small':
-        return 'h-48';
-      default:
-        return 'h-56';
-    }
-  };
-
-  const getTitleSize = () => {
-    switch(size) {
-      case 'large':
-        return 'text-2xl md:text-3xl';
-      case 'medium':
-        return 'text-xl';
-      case 'small':
-        return 'text-lg';
-      default:
-        return 'text-xl';
-    }
-  };
-
-  const truncateContent = (content, maxLength = 120) => {
-    if (!content) return '';
-    const plainText = content.replace(/<[^>]*>/g, '');
-    if (plainText.length <= maxLength) return plainText;
-    return plainText.substring(0, maxLength) + '...';
-  };
+  const excerpt = blog.excerpt || markdownToPlainText(blog.content).substring(0, 150);
 
   return (
-    <article className={`entry-tpl-tile ${size === 'large' ? 'entry-tpl-tile-xl' : ''} g1-dark`}>
-      {/* Featured Image */}
-      <div className="entry-featured-media">
-        <Link 
-          to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`} 
-          className="g1-frame"
-          onClick={handleReadMore}
-        >
-          <div className="g1-frame-inner">
-            {blog.blogImage && (
-              <img
-                src={blog.blogImage}
-                alt={blog.title}
-                className={`w-full ${getImageSize()} object-cover lazyloaded`}
-                loading="lazy"
-              />
-            )}
-            <span className="g1-frame-icon"></span>
-          </div>
-        </Link>
-      </div>
+    <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+      {/* Image */}
+      <Link to={blogUrl} className="block">
+        <img
+          src={blog.blogImage}
+          alt={`${blog.title} - Featured image`}
+          className="w-full h-48 object-cover"
+          loading="lazy"
+          width="400"
+          height="225"
+        />
+      </Link>
 
       {/* Content */}
-      <div className="entry-body p-4 bg-white">
-        {/* Categories */}
-        <header className="entry-header">
-          <div className="entry-before-title mb-2">
-            <span className="entry-categories">
-              <span className="entry-categories-inner">
-                <span className="entry-categories-label text-sm text-gray-500">in</span>
-                {getCategoryDisplay(blog.tags)}
-                {blog.tags && blog.tags.length > 2 && (
-                  <span className="text-sm text-gray-500 ml-1">+{blog.tags.length - 2} more</span>
-                )}
-              </span>
+      <div className="p-4">
+        {/* Categories/Tags */}
+        {blog.tags && blog.tags.length > 0 && (
+          <div className="mb-2">
+            <span className="text-xs font-medium text-gray-500">
+              {blog.tags.slice(0, 2).map((tag, idx) => (
+                <span key={idx}>
+                  <Link 
+                    to={`/category/${tag.toLowerCase().replace(/\s+/g, '-')}`}
+                    className="hover:text-gray-700"
+                  >
+                    {tag}
+                  </Link>
+                  {idx === 0 && blog.tags.length > 1 ? ', ' : ''}
+                </span>
+              ))}
             </span>
           </div>
+        )}
 
-          {/* Title */}
-          <h3 className={`${getTitleSize()} font-bold entry-title mb-3`}>
-            <Link 
-              to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`}
-              className="text-gray-900 hover:text-black"
-              onClick={handleReadMore}
-            >
-              {blog.title}
-            </Link>
-          </h3>
+        {/* Title */}
+        <h3 className={`font-bold mb-2 ${size === 'large' ? 'text-xl' : 'text-lg'}`}>
+          <Link to={blogUrl} className="text-gray-900 hover:text-black">
+            {blog.title}
+          </Link>
+        </h3>
 
-          {/* Excerpt - Only show for medium/large cards */}
-          {showExcerpt && (size === 'large' || size === 'medium') && blog.content && (
-            <p className="text-gray-600 mb-4 line-clamp-3">
-              {truncateContent(blog.content, size === 'large' ? 200 : 150)}
-            </p>
-          )}
+        {/* Excerpt */}
+        {showExcerpt && excerpt && (
+          <p className="text-gray-600 mb-3 text-sm">
+            {excerpt}...
+          </p>
+        )}
 
-          {/* Author and Date - Only for large cards */}
-          {size === 'large' && (
-            <div className="flex items-center mb-4">
-              {blog.authorImage && (
-                <img 
-                  src={blog.authorImage} 
-                  alt={blog.author}
-                  className="w-8 h-8 rounded-full mr-3"
-                />
-              )}
-              <div>
-                <p className="text-sm font-medium text-gray-800">{blog.author || 'Admin'}</p>
-                <p className="text-xs text-gray-500">{formatDate(blog.createdAt)}</p>
-              </div>
-            </div>
-          )}
-
-          {/* Read More Button - Only for large cards */}
-          {size === 'large' && (
-            <div className="entry-ctas">
-              <Link 
-                to={`/blog/${generateSlug(blog.title)}?id=${blog._id}`}
-                className="inline-block px-5 py-2.5 bg-black text-white font-medium rounded hover:bg-gray-800 transition-colors"
-                onClick={handleReadMore}
-              >
-                Read More
-              </Link>
-            </div>
-          )}
-
-a          {/* Small stats for normal/small cards (date only; likes/comments removed) */}
-          {(size === 'normal' || size === 'small') && (
-            <div className="flex items-center justify-start text-sm text-gray-500 mt-3">
-              <span>{formatDate(blog.createdAt)}</span>
-            </div>
-          )}
-        </header>
+        {/* Date and Read More */}
+        <div className="flex items-center justify-between text-sm">
+          <time dateTime={blog.createdAt} className="text-gray-500">
+            {new Date(blog.createdAt).toLocaleDateString('en-US', {
+              month: 'short',
+              day: 'numeric'
+            })}
+          </time>
+          <Link 
+            to={blogUrl}
+            className="text-blue-600 hover:text-blue-800 font-medium"
+            aria-label={`Read ${blog.title}`}
+          >
+            Read →
+          </Link>
+        </div>
       </div>
     </article>
   );
-}
+};
+
+export default BlogCard;
