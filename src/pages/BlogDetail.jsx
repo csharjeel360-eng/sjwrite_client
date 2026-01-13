@@ -619,7 +619,7 @@ export default function BlogDetail() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar - Table of Contents */}
           {headings.length > 0 && (
-            <aside className="lg:w-64 flex-shrink-0">
+            <aside className="hidden lg:block lg:w-64 flex-shrink-0">
               <div className="sticky top-24">
                 <div className="bg-gray-50 rounded-lg p-4">
                   <h4 className="font-semibold text-gray-900 mb-3">Table of Contents</h4>
@@ -817,11 +817,10 @@ export default function BlogDetail() {
                       <a
                         key={platform}
                         href="#"
-                        className="w-10 h-10 rounded-full bg-black text-white flex items-center justify-center hover:bg-gray-800 transition-colors"
+                        className="w-10 h-10 rounded-full bg-black flex items-center justify-center hover:bg-gray-800 transition-colors"
                         aria-label={`Follow on ${platform}`}
                       >
-                        {/* Icons would go here */}
-                        {platform.charAt(0)}
+                        <SocialIcon platform={platform} />
                       </a>
                     ))}
                   </div>
@@ -927,4 +926,44 @@ export default function BlogDetail() {
       </div>
     </>
   );
+}
+
+// Small helper to render social platform SVGs with brand colors
+function SocialIcon({ platform }) {
+  const name = (platform || '').toLowerCase();
+  const commonProps = { className: 'w-5 h-5', viewBox: '0 0 24 24', xmlns: 'http://www.w3.org/2000/svg', role: 'img' };
+
+  if (name.includes('facebook')) {
+    return (
+      <svg {...commonProps} fill="#1877F2" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.86v-6.98h-2.4V12h2.4V9.7c0-2.37 1.42-3.68 3.6-3.68 1.04 0 2.13.18 2.13.18v2.34h-1.2c-1.18 0-1.55.73-1.55 1.48V12h2.64l-.42 2.88h-2.22v6.98A10 10 0 0022 12z"/></svg>
+    );
+  }
+
+  if (name.includes('instagram')) {
+    // Use a single-brand-like color for simplicity
+    return (
+      <svg {...commonProps} fill="#E1306C" aria-hidden="true"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 6.5A4.5 4.5 0 1016.5 13 4.5 4.5 0 0012 8.5zm6.2-3.7a1.2 1.2 0 11-1.2 1.2 1.2 1.2 0 011.2-1.2z"/></svg>
+    );
+  }
+
+  if (name.includes('x') || name.includes('twitter')) {
+    return (
+      <svg {...commonProps} fill="#1DA1F2" aria-hidden="true"><path d="M22 5.92c-.68.3-1.41.5-2.17.59.78-.47 1.37-1.22 1.65-2.11-.73.43-1.54.73-2.4.9A4.16 4.16 0 0015.5 4c-2.3 0-4.16 1.86-4.16 4.15 0 .33.04.65.11.95C7.69 9.86 4.07 7.9 1.64 4.9c-.36.62-.57 1.33-.57 2.09 0 1.44.73 2.71 1.84 3.46-.66-.02-1.28-.2-1.82-.5v.05c0 2.02 1.44 3.7 3.35 4.08-.35.1-.72.15-1.1.15-.27 0-.53-.03-.79-.07.53 1.66 2.07 2.87 3.9 2.9A8.35 8.35 0 010 19.54a11.8 11.8 0 006.29 1.84c7.55 0 11.69-6.26 11.69-11.69v-.53A8.3 8.3 0 0024 6.1c-.85.38-1.76.64-2.71.75z"/></svg>
+    );
+  }
+
+  if (name.includes('whatsapp')) {
+    return (
+      <svg {...commonProps} fill="#25D366" aria-hidden="true"><path d="M20.5 3.5A11.9 11.9 0 0012 0C5.4 0 .1 5.3.1 11.9c0 2.1.6 4.1 1.7 5.9L0 24l6.5-1.7c1.7 1 3.7 1.6 5.8 1.6 6.6 0 12-5.4 12-12 0-3.2-1.2-6.2-3.3-8.3zM12 21.5c-1.7 0-3.3-.5-4.7-1.4l-.3-.2-3.9 1 1.1-3.8-.2-.4C3.2 13.9 2.7 12 2.7 10 2.7 5.2 6.7 1.7 11.5 1.7S20.2 5.2 20.2 10 16.2 21.5 12 21.5zM16.1 14.6c-.3-.1-1.7-.9-2-.9-.3 0-.5-.1-.7.1-.2.2-.9.9-1.2 1.2-.2.3-.4.3-.7.1-.3-.2-1.2-.4-2.3-1.4-.9-.8-1.6-1.9-1.8-2.3-.2-.4 0-.6.1-.8.1-.2.3-.6.4-.9.2-.3.1-.6 0-.8-.1-.2-.7-1.7-.9-2.3-.2-.6-.4-.5-.8-.5-.2 0-.5 0-.8 0-.3 0-.8.1-1.1.5-.3.4-1 1.1-1 2.6s1 3 1.2 3.2c.2.2 2.1 3.2 5.1 4.4 3 .9 3.4.8 4 1 .6.2 1.5.6 1.7 1 .2.4.2.7.1.8-.1.2-.3.3-.6.3-.2 0-.8-.1-1.6-.5-1-.4-1.7-.9-2.6-1.5z"/></svg>
+    );
+  }
+
+  if (name.includes('linkedin')) {
+    return (
+      <svg {...commonProps} fill="#0077B5" aria-hidden="true"><path d="M20.45 20.45h-3.6v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.07 1.4-2.07 2.85v5.5h-3.6V9h3.46v1.56h.05c.48-.9 1.66-1.85 3.42-1.85 3.66 0 4.34 2.41 4.34 5.55v6.19zM5.34 7.43a2.07 2.07 0 110-4.14 2.07 2.07 0 010 4.14zM7.09 20.45H3.6V9h3.49v11.45z"/></svg>
+    );
+  }
+
+  // Fallback: simple circle with initial
+  return <span className="text-sm font-semibold">{platform?.charAt(0) || '?'}</span>;
 }
