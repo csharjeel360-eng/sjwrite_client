@@ -17,10 +17,26 @@ const handleResponse = async (response) => {
   return data;
 };
 
+// Improved fetch with better error logging
+const fetchWithErrorLogging = async (url, options = {}) => {
+  try {
+    console.log('Fetching:', url);
+    const res = await fetch(url, options);
+    console.log('Response status:', res.status, 'headers:', {
+      'Access-Control-Allow-Origin': res.headers.get('Access-Control-Allow-Origin'),
+      'Content-Type': res.headers.get('Content-Type')
+    });
+    return res;
+  } catch (error) {
+    console.error('Fetch error for', url, ':', error);
+    throw error;
+  }
+};
+
 export const api = {
   // Auth
   async register(username, password) {
-    const res = await fetch(`${API_BASE}admin/register`, {
+    const res = await fetchWithErrorLogging(`${API_BASE}admin/register`, {
       method: 'POST',
       headers: jsonHeaders(),
       body: JSON.stringify({ username, password }),
@@ -29,7 +45,7 @@ export const api = {
   },
 
   async login(username, password) {
-    const res = await fetch(`${API_BASE}admin/login`, {
+    const res = await fetchWithErrorLogging(`${API_BASE}admin/login`, {
       method: 'POST',
       headers: jsonHeaders(),
       body: JSON.stringify({ username, password }),
@@ -40,49 +56,49 @@ export const api = {
   // Blogs (public)
   async getBlogs(tag = null) {
     const url = tag ? `${API_BASE}blogs?tag=${encodeURIComponent(tag)}` : `${API_BASE}blogs`;
-    const res = await fetch(url);
+    const res = await fetchWithErrorLogging(url);
     return handleResponse(res);
   },
 
   async getBlog(id) {
-    const res = await fetch(`${API_BASE}blogs/${id}`);
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/${id}`);
     return handleResponse(res);
   },
 
   async searchBlogs(q) {
-    const res = await fetch(`${API_BASE}blogs/search?q=${encodeURIComponent(q)}`);
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/search?q=${encodeURIComponent(q)}`);
     return handleResponse(res);
   },
 
   async sortBlogs(by) {
-    const res = await fetch(`${API_BASE}blogs/sort?by=${encodeURIComponent(by)}`);
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/sort?by=${encodeURIComponent(by)}`);
     return handleResponse(res);
   },
 
   async blogsByTag(tag) {
-    const res = await fetch(`${API_BASE}blogs/tag/${encodeURIComponent(tag)}`);
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/tag/${encodeURIComponent(tag)}`);
     return handleResponse(res);
   },
 
   async getAllTags() {
-    const res = await fetch(`${API_BASE}blogs/tags/all`);
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/tags/all`);
     return handleResponse(res);
   },
 
   async getPopularTags() {
-    const res = await fetch(`${API_BASE}blogs/tags/popular`);
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/tags/popular`);
     return handleResponse(res);
   },
 
   async likeBlog(id) {
-    const res = await fetch(`${API_BASE}blogs/${id}/like`, { 
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/${id}/like`, { 
       method: 'POST' 
     });
     return handleResponse(res);
   },
 
   async addComment(id, payload) {
-    const res = await fetch(`${API_BASE}blogs/${id}/comment`, {
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/${id}/comment`, {
       method: 'POST',
       headers: jsonHeaders(),
       body: JSON.stringify(payload),
@@ -92,7 +108,7 @@ export const api = {
 
   // Blogs (admin protected)
   async createBlog(payload, token) {
-    const res = await fetch(`${API_BASE}blogs`, {
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs`, {
       method: 'POST',
       headers: jsonHeaders(token),
       body: JSON.stringify(payload),
@@ -101,7 +117,7 @@ export const api = {
   },
 
   async updateBlog(id, payload, token) {
-    const res = await fetch(`${API_BASE}blogs/${id}`, {
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/${id}`, {
       method: 'PUT',
       headers: jsonHeaders(token),
       body: JSON.stringify(payload),
@@ -110,7 +126,7 @@ export const api = {
   },
 
   async deleteBlog(id, token) {
-    const res = await fetch(`${API_BASE}blogs/${id}`, {
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/${id}`, {
       method: 'DELETE',
       headers: jsonHeaders(token),
     });
@@ -122,7 +138,7 @@ export const api = {
     const formData = new FormData();
     formData.append('image', file);
     
-    const res = await fetch(`${API_BASE}blogs/upload`, {
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/upload`, {
       method: 'POST',
       headers: token ? { Authorization: `Bearer ${token}` } : {},
       body: formData,
@@ -131,7 +147,7 @@ export const api = {
   },
 
   async incrementView(id) {
-    const res = await fetch(`${API_BASE}blogs/${id}/view`, {
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/${id}/view`, {
       method: 'POST',
     });
     return handleResponse(res);
