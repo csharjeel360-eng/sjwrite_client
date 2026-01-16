@@ -15,26 +15,28 @@ export default function Trending() {
         let tagged = [];
         try {
           const byQuery = await api.getBlogs('trending');
-          console.debug('Trending.jsx: api.getBlogs("trending") returned:', byQuery?.length);
+          console.log('Trending.jsx: api.getBlogs("trending") returned:', byQuery?.length);
           if (Array.isArray(byQuery) && byQuery.length > 0) {
             tagged = byQuery;
           } else {
             try {
               const byTagRoute = await api.blogsByTag('trending');
-              console.debug('Trending.jsx: api.blogsByTag("trending") returned:', byTagRoute?.length);
+              console.log('Trending.jsx: api.blogsByTag("trending") returned:', byTagRoute?.length);
               if (Array.isArray(byTagRoute) && byTagRoute.length > 0) tagged = byTagRoute;
             } catch (e2) {
-              console.debug('Trending.jsx: api.blogsByTag failed', e2?.message || e2);
+              console.warn('Trending.jsx: api.blogsByTag failed', e2?.message || e2);
             }
           }
 
           if (!tagged || tagged.length === 0) {
             const all = await api.getBlogs();
-            console.debug('Trending.jsx: api.getBlogs() total posts:', (all || []).length);
-            tagged = (all || []).filter(b => {
-              const normalized = (b.tags || []).map(t => String(t).toLowerCase().trim());
-              return normalized.some(t => t === 'trending' || t.includes('trending'));
-            });
+            console.log('Trending.jsx: api.getBlogs() total posts:', (all || []).length);
+            if (all?.length > 0) {
+              tagged = (all || []).filter(b => {
+                const normalized = (b.tags || []).map(t => String(t).toLowerCase().trim());
+                return normalized.some(t => t === 'trending' || t.includes('trending'));
+              });
+            }
           }
         } catch (e) {
           console.error('Trending.jsx: unexpected error while loading tags', e);
@@ -42,7 +44,7 @@ export default function Trending() {
 
         // sort by date so newest trending appear first
         (tagged || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-        console.debug('Trending.jsx: final tagged count =', (tagged || []).length, 'sample tags:', (tagged[0] && tagged[0].tags) || 'none');
+        console.log('Trending.jsx: final tagged count =', (tagged || []).length);
         setPosts(tagged || []);
       } catch (err) {
         console.error('Error loading trending posts:', err);

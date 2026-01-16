@@ -15,34 +15,36 @@ export default function Blogs() {
         let tagged = [];
         try {
           const byQuery = await api.getBlogs('blog');
-          console.debug('Blogs.jsx: api.getBlogs("blog") returned:', byQuery?.length);
+          console.log('Blogs.jsx: api.getBlogs("blog") returned:', byQuery?.length);
           if (Array.isArray(byQuery) && byQuery.length > 0) {
             tagged = byQuery;
           } else {
             try {
               const byTagRoute = await api.blogsByTag('blog');
-              console.debug('Blogs.jsx: api.blogsByTag("blog") returned:', byTagRoute?.length);
+              console.log('Blogs.jsx: api.blogsByTag("blog") returned:', byTagRoute?.length);
               if (Array.isArray(byTagRoute) && byTagRoute.length > 0) {
                 tagged = byTagRoute;
               }
             } catch (e2) {
-              console.debug('Blogs.jsx: api.blogsByTag failed', e2?.message || e2);
+              console.warn('Blogs.jsx: api.blogsByTag failed', e2?.message || e2);
             }
           }
 
           if (!tagged || tagged.length === 0) {
             // fallback to client-side filtering
             const all = await api.getBlogs();
-            console.debug('Blogs.jsx: api.getBlogs() total posts:', (all || []).length);
-            tagged = (all || []).filter(b => {
-              const normalized = (b.tags || []).map(t => String(t).toLowerCase().trim());
-              return normalized.some(t => t === 'blog' || t.includes('blog'));
-            });
+            console.log('Blogs.jsx: api.getBlogs() total posts:', (all || []).length);
+            if (all?.length > 0) {
+              tagged = (all || []).filter(b => {
+                const normalized = (b.tags || []).map(t => String(t).toLowerCase().trim());
+                return normalized.some(t => t === 'blog' || t.includes('blog'));
+              });
+            }
           }
         } catch (e) {
           console.error('Blogs.jsx: unexpected error while loading tags', e);
         }
-        console.debug('Blogs.jsx: final tagged count =', (tagged || []).length, 'sample tags:', (tagged[0] && tagged[0].tags) || 'none');
+        console.log('Blogs.jsx: final tagged count =', (tagged || []).length);
         setBlogs(tagged || []);
       } catch (err) {
         console.error('Error loading blog-tagged posts:', err);
