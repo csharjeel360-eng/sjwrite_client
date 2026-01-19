@@ -8,7 +8,7 @@ import TableOfContents from '../components/TableOfContents';
 import { Helmet } from 'react-helmet-async';
 
 // Add this import at the top
-import profileImage from '../assets/3.png'; // Adjust the path as needed
+import profileImage from '../assets/1.png'; // Adjust the path as needed
 
 // Helper function to safely handle tags and split multi-word tags
 const getSafeTags = (tags) => {
@@ -457,7 +457,10 @@ export default function BlogDetail() {
         {/* 🟢 Open Graph tags */}
         <meta property="og:title" content={blog.title} />
         <meta property="og:description" content={description} />
-        <meta property="og:image" content={blog.blogImage} />
+        <meta property="og:image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:type" content="image/jpeg" />
         <meta property="og:url" content={cleanUrl} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="SJWrites" />
@@ -475,7 +478,7 @@ export default function BlogDetail() {
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content={blog.title} />
         <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={blog.blogImage} />
+        <meta name="twitter:image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
         <meta name="twitter:image:alt" content={blog.title} />
         
         {/* 🟢 BlogPosting Schema (MOST IMPORTANT FOR INDEXING) */}
@@ -485,7 +488,7 @@ export default function BlogDetail() {
             "@type": "BlogPosting",
             "headline": blog.title,
             "description": description,
-            "image": blog.blogImage,
+            "image": blog.blogImage || blog.image,
             "author": {
               "@type": "Person",
               "name": blog.author?.name || "Sharjeel",
@@ -553,39 +556,65 @@ export default function BlogDetail() {
           <div className="bg-white rounded-lg max-w-md w-full mx-auto">
             <div className="p-6">
               <h3 className="text-lg font-semibold mb-4">Share this post</h3>
-              <div className="flex gap-4 justify-center mb-6">
+              
+              {/* Blog Preview Card */}
+              {blog.blogImage && (
+                <div className="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                  <img 
+                    src={blog.blogImage} 
+                    alt={blog.title}
+                    className="w-full h-32 object-cover rounded mb-2"
+                  />
+                  <p className="text-sm font-medium text-gray-900 line-clamp-2">{blog.title}</p>
+                </div>
+              )}
+              
+              <div className="flex gap-4 justify-center mb-6 flex-wrap">
                 <button
                   onClick={() => {
                     window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(blog.title)}&url=${encodeURIComponent(cleanUrl)}`, '_blank');
                   }}
-                  className="p-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                  className="hover:opacity-70 transition-opacity"
                   aria-label="Share on X (Twitter)"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                  </svg>
+                  <img src="https://img.icons8.com/color/48/twitter.png" alt="Twitter" className="w-8 h-8" />
                 </button>
                 <button
                   onClick={() => {
                     window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(cleanUrl)}`, '_blank');
                   }}
-                  className="p-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                  className="hover:opacity-70 transition-opacity"
                   aria-label="Share on Facebook"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                  </svg>
+                  <img src="https://img.icons8.com/color/48/facebook-new.png" alt="Facebook" className="w-8 h-8" />
                 </button>
                 <button
                   onClick={() => {
                     window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(cleanUrl)}`, '_blank');
                   }}
-                  className="p-3 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
+                  className="hover:opacity-70 transition-opacity"
                   aria-label="Share on LinkedIn"
                 >
-                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
-                  </svg>
+                  <img src="https://img.icons8.com/color/48/linkedin.png" alt="LinkedIn" className="w-8 h-8" />
+                </button>
+                <button
+                  onClick={() => {
+                    const text = `${blog.title}\n${cleanUrl}`;
+                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+                  }}
+                  className="hover:opacity-70 transition-opacity"
+                  aria-label="Share on WhatsApp"
+                >
+                  <img src="https://img.icons8.com/color/48/whatsapp.png" alt="WhatsApp" className="w-8 h-8" />
+                </button>
+                <button
+                  onClick={() => {
+                    alert('Instagram sharing: Open Instagram and share the link in your story or direct message');
+                  }}
+                  className="hover:opacity-70 transition-opacity"
+                  aria-label="Share on Instagram"
+                >
+                  <img src="https://img.icons8.com/color/48/instagram-new.png" alt="Instagram" className="w-8 h-8" />
                 </button>
               </div>
               <div className="flex gap-2">
@@ -654,7 +683,14 @@ export default function BlogDetail() {
                 <img 
                   src={profileImage} 
                   alt="SJWrites logo" 
-                  className="w-12 h-12 rounded-full object-cover" 
+                  className="w-14 h-14 rounded-full object-cover border-2 border-gray-300 shadow-sm flex-shrink-0" 
+                  style={{ 
+                    imageRendering: 'auto',
+                    filter: 'none',
+                    WebkitFontSmoothing: 'antialiased',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translate3d(0, 0, 0)'
+                  }}
                 />
                 <div>
                   <div className="font-medium text-gray-900">by Sharjeel</div>
@@ -802,7 +838,12 @@ export default function BlogDetail() {
                   <img
                     src={profileImage}
                     alt="Sharjeel - Author of SJWrites"
-                    className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-lg"
+                    className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg"
+                    style={{ 
+                      imageRendering: 'crisp-edges',
+                      WebkitFontSmoothing: 'antialiased',
+                      backfaceVisibility: 'hidden'
+                    }}
                   />
                 </div>
                 <div className="flex-1 text-center md:text-left">
@@ -812,12 +853,12 @@ export default function BlogDetail() {
                     celebrity news and photos. This is your one-stop shop for all entertainment news
                     and insightful articles across business, tech, and lifestyle.
                   </p>
-                  <div className="flex flex-wrap justify-center md:justify-start gap-3">
+                  <div className="flex flex-wrap justify-center md:justify-start gap-5">
                     {['Facebook', 'Instagram', 'X (Twitter)', 'WhatsApp', 'LinkedIn'].map((platform) => (
                       <a
                         key={platform}
                         href="#"
-                        className="w-10 h-10 rounded-full bg-black flex items-center justify-center hover:bg-gray-800 transition-colors"
+                        className="hover:opacity-70 transition-opacity"
                         aria-label={`Follow on ${platform}`}
                       >
                         <SocialIcon platform={platform} />
@@ -928,42 +969,27 @@ export default function BlogDetail() {
   );
 }
 
-// Small helper to render social platform SVGs with brand colors
+// Small helper to render social platform icons as images
 function SocialIcon({ platform }) {
   const name = (platform || '').toLowerCase();
-  const commonProps = { className: 'w-5 h-5', viewBox: '0 0 24 24', xmlns: 'http://www.w3.org/2000/svg', role: 'img' };
+  let iconUrl = '';
 
   if (name.includes('facebook')) {
-    return (
-      <svg {...commonProps} fill="#1877F2" aria-hidden="true"><path d="M22 12a10 10 0 10-11.5 9.86v-6.98h-2.4V12h2.4V9.7c0-2.37 1.42-3.68 3.6-3.68 1.04 0 2.13.18 2.13.18v2.34h-1.2c-1.18 0-1.55.73-1.55 1.48V12h2.64l-.42 2.88h-2.22v6.98A10 10 0 0022 12z"/></svg>
-    );
+    iconUrl = 'https://img.icons8.com/color/48/facebook-new.png';
+  } else if (name.includes('instagram')) {
+    iconUrl = 'https://img.icons8.com/color/48/instagram-new.png';
+  } else if (name.includes('x') || name.includes('twitter')) {
+    iconUrl = 'https://img.icons8.com/color/48/twitter.png';
+  } else if (name.includes('whatsapp')) {
+    iconUrl = 'https://img.icons8.com/color/48/whatsapp.png';
+  } else if (name.includes('linkedin')) {
+    iconUrl = 'https://img.icons8.com/color/48/linkedin.png';
   }
 
-  if (name.includes('instagram')) {
-    // Use a single-brand-like color for simplicity
-    return (
-      <svg {...commonProps} fill="#E1306C" aria-hidden="true"><path d="M7 2h10a5 5 0 015 5v10a5 5 0 01-5 5H7a5 5 0 01-5-5V7a5 5 0 015-5zm5 6.5A4.5 4.5 0 1016.5 13 4.5 4.5 0 0012 8.5zm6.2-3.7a1.2 1.2 0 11-1.2 1.2 1.2 1.2 0 011.2-1.2z"/></svg>
-    );
+  if (iconUrl) {
+    return <img src={iconUrl} alt={platform} className="w-8 h-8" />;
   }
 
-  if (name.includes('x') || name.includes('twitter')) {
-    return (
-      <svg {...commonProps} fill="#1DA1F2" aria-hidden="true"><path d="M22 5.92c-.68.3-1.41.5-2.17.59.78-.47 1.37-1.22 1.65-2.11-.73.43-1.54.73-2.4.9A4.16 4.16 0 0015.5 4c-2.3 0-4.16 1.86-4.16 4.15 0 .33.04.65.11.95C7.69 9.86 4.07 7.9 1.64 4.9c-.36.62-.57 1.33-.57 2.09 0 1.44.73 2.71 1.84 3.46-.66-.02-1.28-.2-1.82-.5v.05c0 2.02 1.44 3.7 3.35 4.08-.35.1-.72.15-1.1.15-.27 0-.53-.03-.79-.07.53 1.66 2.07 2.87 3.9 2.9A8.35 8.35 0 010 19.54a11.8 11.8 0 006.29 1.84c7.55 0 11.69-6.26 11.69-11.69v-.53A8.3 8.3 0 0024 6.1c-.85.38-1.76.64-2.71.75z"/></svg>
-    );
-  }
-
-  if (name.includes('whatsapp')) {
-    return (
-      <svg {...commonProps} fill="#25D366" aria-hidden="true"><path d="M20.5 3.5A11.9 11.9 0 0012 0C5.4 0 .1 5.3.1 11.9c0 2.1.6 4.1 1.7 5.9L0 24l6.5-1.7c1.7 1 3.7 1.6 5.8 1.6 6.6 0 12-5.4 12-12 0-3.2-1.2-6.2-3.3-8.3zM12 21.5c-1.7 0-3.3-.5-4.7-1.4l-.3-.2-3.9 1 1.1-3.8-.2-.4C3.2 13.9 2.7 12 2.7 10 2.7 5.2 6.7 1.7 11.5 1.7S20.2 5.2 20.2 10 16.2 21.5 12 21.5zM16.1 14.6c-.3-.1-1.7-.9-2-.9-.3 0-.5-.1-.7.1-.2.2-.9.9-1.2 1.2-.2.3-.4.3-.7.1-.3-.2-1.2-.4-2.3-1.4-.9-.8-1.6-1.9-1.8-2.3-.2-.4 0-.6.1-.8.1-.2.3-.6.4-.9.2-.3.1-.6 0-.8-.1-.2-.7-1.7-.9-2.3-.2-.6-.4-.5-.8-.5-.2 0-.5 0-.8 0-.3 0-.8.1-1.1.5-.3.4-1 1.1-1 2.6s1 3 1.2 3.2c.2.2 2.1 3.2 5.1 4.4 3 .9 3.4.8 4 1 .6.2 1.5.6 1.7 1 .2.4.2.7.1.8-.1.2-.3.3-.6.3-.2 0-.8-.1-1.6-.5-1-.4-1.7-.9-2.6-1.5z"/></svg>
-    );
-  }
-
-  if (name.includes('linkedin')) {
-    return (
-      <svg {...commonProps} fill="#0077B5" aria-hidden="true"><path d="M20.45 20.45h-3.6v-5.4c0-1.29-.02-2.95-1.8-2.95-1.8 0-2.07 1.4-2.07 2.85v5.5h-3.6V9h3.46v1.56h.05c.48-.9 1.66-1.85 3.42-1.85 3.66 0 4.34 2.41 4.34 5.55v6.19zM5.34 7.43a2.07 2.07 0 110-4.14 2.07 2.07 0 010 4.14zM7.09 20.45H3.6V9h3.49v11.45z"/></svg>
-    );
-  }
-
-  // Fallback: simple circle with initial
+  // Fallback: simple text
   return <span className="text-sm font-semibold">{platform?.charAt(0) || '?'}</span>;
 }
