@@ -1,5 +1,6 @@
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useState, useEffect, useRef } from 'react';
+import logo from '../assets/7.png';
 
 export default function Navbar({ onSearch }) {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -83,9 +84,9 @@ export default function Navbar({ onSearch }) {
             {/* Fixed Logo */}
             <Link 
               to="/" 
-              className="text-2xl font-bold text-black flex items-center"
+              className="flex items-center"
             >
-              SJ Writes
+              <img src={logo} alt="SJ Writes" className="h-10 w-auto" />
             </Link>
 
             {/* Desktop Navigation - Left Side */}
