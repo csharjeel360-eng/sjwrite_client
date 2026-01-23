@@ -243,15 +243,15 @@ function EnhancedShareModal({ blog, onClose, cleanUrl, description }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl max-w-md w-full mx-auto shadow-2xl">
-        <div className="p-6">
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-2 sm:p-4">
+      <div className="bg-white rounded-xl w-full max-w-md mx-auto shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="p-4 sm:p-6">
           {/* Header */}
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-xl font-bold text-gray-900">Share This Post</h3>
+          <div className="flex justify-between items-center mb-4 sm:mb-6">
+            <h3 className="text-lg sm:text-xl font-bold text-gray-900">Share This Post</h3>
             <button 
               onClick={onClose}
-              className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-full transition-colors"
+              className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-full transition-colors flex-shrink-0"
               aria-label="Close"
             >
               <i className="fas fa-times text-lg"></i>
@@ -259,171 +259,171 @@ function EnhancedShareModal({ blog, onClose, cleanUrl, description }) {
           </div>
           
           {/* Blog Preview Card with Image */}
-          <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-gray-50 to-white">
+          <div className="mb-4 sm:mb-6 overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-gray-50 to-white">
             {blog.blogImage ? (
               <div className="relative">
                 <img 
                   src={blog.blogImage} 
                   alt={blog.title}
-                  className="w-full h-48 object-cover"
+                  className="w-full h-32 sm:h-48 object-cover"
                 />
                 <button
                   onClick={downloadImage}
-                  className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-sm"
+                  className="absolute top-2 sm:top-3 right-2 sm:right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-sm"
                   aria-label="Download image"
                   title="Download image"
                 >
-                  <i className="fas fa-download text-gray-700"></i>
+                  <i className="fas fa-download text-gray-700 text-sm"></i>
                 </button>
               </div>
             ) : (
-              <div className="w-full h-48 bg-gradient-to-r from-blue-100 to-cyan-100 flex items-center justify-center">
-                <i className="fas fa-image text-4xl text-gray-400"></i>
+              <div className="w-full h-32 sm:h-48 bg-gradient-to-r from-blue-100 to-cyan-100 flex items-center justify-center">
+                <i className="fas fa-image text-2xl sm:text-4xl text-gray-400"></i>
               </div>
             )}
-            <div className="p-4">
-              <h4 className="font-bold text-gray-900 mb-2 line-clamp-2">{blog.title}</h4>
+            <div className="p-3 sm:p-4">
+              <h4 className="font-bold text-gray-900 mb-1 sm:mb-2 line-clamp-2 text-sm sm:text-base">{blog.title}</h4>
               {description && (
-                <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
+                <p className="text-xs sm:text-sm text-gray-600 line-clamp-2">{description}</p>
               )}
             </div>
           </div>
 
-          {/* Share Buttons Grid */}
-          <div className="mb-6">
-            <p className="text-sm text-gray-600 mb-4 text-center">Share on social media:</p>
-            <div className="grid grid-cols-4 gap-3">
+          {/* Share Buttons Grid - Responsive */}
+          <div className="mb-4 sm:mb-6">
+            <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 text-center">Share on social media:</p>
+            <div className="grid grid-cols-4 sm:grid-cols-4 gap-2 sm:gap-3">
               {/* Facebook */}
               <button
                 onClick={() => shareOnPlatform('facebook')}
-                className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                className="flex flex-col items-center p-2 sm:p-3 bg-blue-50 rounded-lg sm:rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 aria-label="Share on Facebook"
                 title="Facebook"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-2 transition-colors">
-                  <i className="fab fa-facebook-f text-blue-600 text-lg"></i>
+                <div className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-1 sm:mb-2 transition-colors">
+                  <i className="fab fa-facebook-f text-blue-600 text-sm sm:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-gray-700">Facebook</span>
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight">Facebook</span>
               </button>
               
               {/* Twitter */}
               <button
                 onClick={() => shareOnPlatform('twitter')}
-                className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                className="flex flex-col items-center p-2 sm:p-3 bg-blue-50 rounded-lg sm:rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 aria-label="Share on Twitter"
                 title="Twitter"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-2 transition-colors">
-                  <i className="fab fa-twitter text-blue-400 text-lg"></i>
+                <div className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-1 sm:mb-2 transition-colors">
+                  <i className="fab fa-twitter text-blue-400 text-sm sm:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-gray-700">Twitter</span>
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight">Twitter</span>
               </button>
               
               {/* LinkedIn */}
               <button
                 onClick={() => shareOnPlatform('linkedin')}
-                className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                className="flex flex-col items-center p-2 sm:p-3 bg-blue-50 rounded-lg sm:rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 aria-label="Share on LinkedIn"
                 title="LinkedIn"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-2 transition-colors">
-                  <i className="fab fa-linkedin-in text-blue-700 text-lg"></i>
+                <div className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-1 sm:mb-2 transition-colors">
+                  <i className="fab fa-linkedin-in text-blue-700 text-sm sm:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-gray-700">LinkedIn</span>
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight">LinkedIn</span>
               </button>
               
               {/* WhatsApp */}
               <button
                 onClick={() => shareOnPlatform('whatsapp')}
-                className="flex flex-col items-center p-3 bg-green-50 rounded-xl hover:bg-green-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                className="flex flex-col items-center p-2 sm:p-3 bg-green-50 rounded-lg sm:rounded-xl hover:bg-green-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 aria-label="Share on WhatsApp"
                 title="WhatsApp"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-100 group-hover:bg-green-200 mb-2 transition-colors">
-                  <i className="fab fa-whatsapp text-green-600 text-lg"></i>
+                <div className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center rounded-full bg-green-100 group-hover:bg-green-200 mb-1 sm:mb-2 transition-colors">
+                  <i className="fab fa-whatsapp text-green-600 text-sm sm:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-gray-700">WhatsApp</span>
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight">WhatsApp</span>
               </button>
               
               {/* Pinterest */}
               <button
                 onClick={() => shareOnPlatform('pinterest')}
-                className="flex flex-col items-center p-3 bg-red-50 rounded-xl hover:bg-red-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                className="flex flex-col items-center p-2 sm:p-3 bg-red-50 rounded-lg sm:rounded-xl hover:bg-red-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 aria-label="Share on Pinterest"
                 title="Pinterest"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-red-100 group-hover:bg-red-200 mb-2 transition-colors">
-                  <i className="fab fa-pinterest-p text-red-600 text-lg"></i>
+                <div className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center rounded-full bg-red-100 group-hover:bg-red-200 mb-1 sm:mb-2 transition-colors">
+                  <i className="fab fa-pinterest-p text-red-600 text-sm sm:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-gray-700">Pinterest</span>
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight">Pinterest</span>
               </button>
               
               {/* Telegram */}
               <button
                 onClick={() => shareOnPlatform('telegram')}
-                className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                className="flex flex-col items-center p-2 sm:p-3 bg-blue-50 rounded-lg sm:rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 aria-label="Share on Telegram"
                 title="Telegram"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-2 transition-colors">
-                  <i className="fab fa-telegram text-blue-500 text-lg"></i>
+                <div className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-1 sm:mb-2 transition-colors">
+                  <i className="fab fa-telegram text-blue-500 text-sm sm:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-gray-700">Telegram</span>
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight">Telegram</span>
               </button>
               
               {/* Email */}
               <button
                 onClick={() => shareOnPlatform('email')}
-                className="flex flex-col items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                className="flex flex-col items-center p-2 sm:p-3 bg-gray-50 rounded-lg sm:rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 aria-label="Share via Email"
                 title="Email"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 group-hover:bg-gray-200 mb-2 transition-colors">
-                  <i className="fas fa-envelope text-gray-600 text-lg"></i>
+                <div className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center rounded-full bg-gray-100 group-hover:bg-gray-200 mb-1 sm:mb-2 transition-colors">
+                  <i className="fas fa-envelope text-gray-600 text-sm sm:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-gray-700">Email</span>
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight">Email</span>
               </button>
               
               {/* Native Share */}
               <button
                 onClick={() => shareOnPlatform('native')}
-                className="flex flex-col items-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                className="flex flex-col items-center p-2 sm:p-3 bg-purple-50 rounded-lg sm:rounded-xl hover:bg-purple-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
                 aria-label="Share via device"
                 title="Device Share"
               >
-                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-purple-100 group-hover:bg-purple-200 mb-2 transition-colors">
-                  <i className="fas fa-share-alt text-purple-600 text-lg"></i>
+                <div className="w-8 sm:w-10 h-8 sm:h-10 flex items-center justify-center rounded-full bg-purple-100 group-hover:bg-purple-200 mb-1 sm:mb-2 transition-colors">
+                  <i className="fas fa-share-alt text-purple-600 text-sm sm:text-lg"></i>
                 </div>
-                <span className="text-xs font-medium text-gray-700">More</span>
+                <span className="text-xs font-medium text-gray-700 text-center leading-tight">More</span>
               </button>
             </div>
           </div>
 
           {/* Copy Link Section */}
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 mb-2">Or copy link:</p>
+          <div className="mb-3 sm:mb-4">
+            <p className="text-xs sm:text-sm text-gray-600 mb-2">Or copy link:</p>
             <div className="flex gap-2">
               <div className="flex-1 relative">
                 <input
                   type="text"
                   value={cleanUrl}
                   readOnly
-                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 pr-24"
+                  className="w-full px-2 sm:px-3 py-2 text-xs sm:text-sm border border-gray-300 rounded-lg bg-gray-50 pr-20 sm:pr-24 truncate"
                 />
                 <button
                   onClick={copyToClipboard}
-                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1.5 rounded-md font-medium transition-colors ${copySuccess ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
+                  className={`absolute right-1 top-1/2 transform -translate-y-1/2 px-2 sm:px-4 py-1 sm:py-1.5 rounded-md font-medium text-xs sm:text-sm transition-colors whitespace-nowrap flex-shrink-0 ${copySuccess ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
                   aria-label="Copy link to clipboard"
                 >
                   {copySuccess ? (
                     <>
                       <i className="fas fa-check mr-1"></i>
-                      Copied!
+                      <span className="hidden sm:inline">Copied!</span>
                     </>
                   ) : (
                     <>
                       <i className="fas fa-copy mr-1"></i>
-                      Copy
+                      <span className="hidden sm:inline">Copy</span>
                     </>
                   )}
                 </button>
@@ -432,10 +432,10 @@ function EnhancedShareModal({ blog, onClose, cleanUrl, description }) {
           </div>
 
           {/* Note about image sharing */}
-          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
-            <p className="flex items-start">
-              <i className="fas fa-info-circle text-blue-500 mr-2 mt-0.5"></i>
-              <span>
+          <div className="text-xs bg-gray-50 p-2 sm:p-3 rounded-lg">
+            <p className="flex items-start gap-2">
+              <i className="fas fa-info-circle text-blue-500 mt-0.5 flex-shrink-0"></i>
+              <span className="text-gray-500">
                 Images are shared automatically via Open Graph tags on most platforms. 
                 Pinterest supports direct image pinning. Ensure your Open Graph tags are properly configured.
               </span>
