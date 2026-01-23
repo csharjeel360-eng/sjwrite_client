@@ -8,7 +8,68 @@ function RichTextEditor({ value, onChange, placeholder }) {
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [showImageInput, setShowImageInput] = useState(false);
+  const [imageUrl, setImageUrl] = useState('');
+  const [imageAlt, setImageAlt] = useState('');
+  const [uploading, setUploading] = useState(false);
   const textareaRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const token = localStorage.getItem('adminToken');
+
+  const handleImageFileSelect = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const result = await api.uploadImage(file, token);
+      if (result.imageUrl) {
+        setImageUrl(result.imageUrl);
+        if (fileInputRef.current) fileInputRef.current.value = '';
+      } else {
+        alert(result.error || 'Upload failed');
+      }
+    } catch (err) {
+      alert('Upload failed: ' + err.message);
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const insertImage = () => {
+    if (!imageUrl) {
+      alert('Please upload or provide an image URL');
+      return;
+    }
+
+    const altText = imageAlt || 'Image';
+    const markdownImage = `![${altText}](${imageUrl})`;
+
+    if (!textareaRef.current) return;
+    const textarea = textareaRef.current;
+    const start = textarea.selectionStart;
+    const newText = value.substring(0, start) + '\n' + markdownImage + '\n' + value.substring(start);
+    onChange(newText);
+
+    setImageUrl('');
+    setImageAlt('');
+    setShowImageInput(false);
+
+    setTimeout(() => {
+      textarea.setSelectionRange(start + markdownImage.length + 2, start + markdownImage.length + 2);
+      textarea.focus();
+    }, 0);
+  };
 
   const applyFormat = (format) => {
     if (!textareaRef.current) return;
@@ -95,21 +156,52 @@ function RichTextEditor({ value, onChange, placeholder }) {
     }, 0);
   };
 
-  // Simple markdown preview renderer
+  // Simple markdown preview renderer with better image handling
   const renderMarkdownPreview = (text) => {
     if (!text) return <p className="text-gray-400">Preview will appear here...</p>;
     
-    // Convert markdown to HTML
-    const html = text
-      .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold my-2">$1</h1>')
-      .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold my-2">$1</h2>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/_(.*?)_/g, '<em>$1</em>')
-      .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-black hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
-      .replace(/\n/g, '<br />');
+    // Split content by image markdown to handle images separately
+    const parts = text.split(/(!?\[.*?\]\(.*?\))/);
     
-    return <div dangerouslySetInnerHTML={{ __html: html }} />;
+    return (
+      <div className="space-y-2">
+        {parts.map((part, idx) => {
+          if (!part) return null;
+          
+          // Check if it's an image markdown
+          const imageMatch = part.match(/!\[(.*?)\]\((.*?)\)/);
+          if (imageMatch) {
+            const [, alt, src] = imageMatch;
+            return (
+              <img 
+                key={idx}
+                src={src} 
+                alt={alt || 'Image'} 
+                className="max-w-full h-auto rounded my-4 border object-cover"
+                onError={(e) => {
+                  e.target.style.border = '2px solid red';
+                  e.target.title = 'Image failed to load';
+                }}
+              />
+            );
+          }
+          
+          // Convert markdown to HTML for non-image content
+          const html = part
+            .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold my-2">$1</h1>')
+            .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold my-2">$1</h2>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em>$1</em>')
+            .replace(/_(.*?)_/g, '<em>$1</em>')
+            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-black hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
+            .replace(/\n/g, '<br />');
+          
+          return (
+            <div key={idx} dangerouslySetInnerHTML={{ __html: html }} />
+          );
+        })}
+      </div>
+    );
   };
 
   return (
@@ -156,6 +248,14 @@ function RichTextEditor({ value, onChange, placeholder }) {
         >
           🔗
         </button>
+        <button
+          type="button"
+          onClick={() => setShowImageInput(!showImageInput)}
+          className="px-2 py-1 rounded hover:bg-gray-200 text-lg"
+          title="Insert Image"
+        >
+          🖼️
+        </button>
       </div>
 
       {/* Link Input */}
@@ -192,6 +292,66 @@ function RichTextEditor({ value, onChange, placeholder }) {
                 setShowLinkInput(false);
                 setLinkUrl('');
                 setLinkText('');
+              }}
+              className="px-2 py-1 bg-gray-300 rounded text-sm"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Image Input */}
+      {showImageInput && (
+        <div className="p-2 border-b bg-gray-50 flex flex-col gap-2">
+          <div className="flex gap-2">
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              onChange={handleImageFileSelect}
+              disabled={uploading}
+              className="flex-1 text-sm"
+            />
+            <span className="text-xs text-gray-600 self-center">OR</span>
+            <input
+              type="url"
+              placeholder="Image URL"
+              value={imageUrl}
+              onChange={(e) => setImageUrl(e.target.value)}
+              className="flex-1 px-2 py-1 border rounded text-sm"
+            />
+          </div>
+          <div className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Alt text (optional)"
+              value={imageAlt}
+              onChange={(e) => setImageAlt(e.target.value)}
+              className="flex-1 px-2 py-1 border rounded text-sm"
+            />
+          </div>
+          {imageUrl && (
+            <div className="max-h-32 overflow-hidden">
+              <img src={imageUrl} alt="preview" className="max-w-full h-auto rounded" />
+            </div>
+          )}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={insertImage}
+              className="px-2 py-1 bg-black text-white rounded text-sm"
+              disabled={!imageUrl || uploading}
+            >
+              {uploading ? 'Uploading...' : 'Insert Image'}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setShowImageInput(false);
+                setImageUrl('');
+                setImageAlt('');
+                if (fileInputRef.current) fileInputRef.current.value = '';
               }}
               className="px-2 py-1 bg-gray-300 rounded text-sm"
             >

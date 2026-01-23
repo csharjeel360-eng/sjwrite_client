@@ -56,7 +56,7 @@ const markdownToPlainText = (markdown) => {
     .substring(0, 160);
 };
 
-// Markdown Renderer Component
+// Markdown Renderer Component with proper image handling
 function MarkdownRenderer({ content, onHeadingsUpdate }) {
   const [htmlContent, setHtmlContent] = useState('');
 
@@ -67,8 +67,20 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
       // Extract headings for table of contents
       const headings = [];
       let headingIndex = 0;
+      
+      // Cache for images to prevent them from being broken by paragraph processing
+      const imageCache = {};
+      let imageIndex = 0;
 
-      const processedText = text
+      // First, extract and cache all images
+      let processedText = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
+        const placeholder = `XIMG${imageIndex}X`;
+        imageCache[placeholder] = `<img src="${src}" alt="${alt}" class="max-w-full h-auto rounded my-4 border object-cover" style="display:block;" />`;
+        imageIndex++;
+        return placeholder;
+      });
+
+      processedText = processedText
         .replace(/^# (.*$)/gim, (match, title) => {
           const id = `heading-${headingIndex++}`;
           headings.push({ id, title, level: 1 });
@@ -95,6 +107,14 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
         .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4 border"><code class="block whitespace-pre">$2</code></pre>')
         .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono border">$1</code>')
         .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 py-2 my-4 bg-gray-50 italic">$1</blockquote>');
+
+      // Now restore all cached images and clean up paragraph wrapping around them
+      Object.entries(imageCache).forEach(([placeholder, imageHtml]) => {
+        processedText = processedText.replace(placeholder, imageHtml);
+      });
+      
+      // Remove broken image paragraph wrapping
+      processedText = processedText.replace(/<p>(<img[^>]*>)<\/p>/g, '$1');
 
       // Notify parent component about headings
       if (onHeadingsUpdate) {
@@ -400,6 +420,39 @@ export default function BlogDetail() {
     navigate(`/blogs?tag=${encodeURIComponent(tag)}`);
   };
 
+  // Helper function to share with image
+  const shareWithImage = async () => {
+    if (!navigator.share) {
+      alert('Web Share API not supported. Please use the individual share buttons.');
+      return;
+    }
+
+    try {
+      let shareData = {
+        title: blog.title,
+        text: description,
+        url: cleanUrl
+      };
+
+      // If blog has an image and Web Share API supports files, include the image
+      if (blog.blogImage && navigator.canShare) {
+        const response = await fetch(blog.blogImage);
+        const blob = await response.blob();
+        const file = new File([blob], 'blog-image.jpg', { type: blob.type });
+        
+        if (navigator.canShare({ files: [file] })) {
+          shareData.files = [file];
+        }
+      }
+
+      await navigator.share(shareData);
+    } catch (error) {
+      if (error.name !== 'AbortError') {
+        console.error('Share failed:', error);
+      }
+    }
+  };
+
   // Safely get tags from blog object
   const tags = blog ? getSafeTags(blog.tags) : [];
 
@@ -466,6 +519,10 @@ export default function BlogDetail() {
         <meta property="og:site_name" content="SJWrites" />
         <meta property="og:locale" content="en_US" />
         
+        {/* 🟢 Google-specific image meta tags */}
+        <meta name="image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
+        <meta name="thumbnail" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
+        
         {/* 🟢 Article specific OG tags */}
         <meta property="article:published_time" content={blog.createdAt} />
         <meta property="article:modified_time" content={blog.updatedAt || blog.createdAt} />
@@ -488,7 +545,14 @@ export default function BlogDetail() {
             "@type": "BlogPosting",
             "headline": blog.title,
             "description": description,
-            "image": blog.blogImage || blog.image,
+            "image": {
+              "@type": "ImageObject",
+              "url": blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png',
+              "width": 1200,
+              "height": 630,
+              "name": blog.title,
+              "description": blog.title
+            },
             "author": {
               "@type": "Person",
               "name": blog.author?.name || "Sharjeel",
@@ -571,50 +635,47 @@ export default function BlogDetail() {
               
               <div className="flex gap-4 justify-center mb-6 flex-wrap">
                 <button
-                  onClick={() => {
-                    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(blog.title)}&url=${encodeURIComponent(cleanUrl)}`, '_blank');
-                  }}
-                  className="hover:opacity-70 transition-opacity"
+                  onClick={shareWithImage}
+                  className="hover:opacity-70 transition-opacity text-blue-400"
                   aria-label="Share on X (Twitter)"
+                  title="Twitter"
                 >
-                  <img src="https://img.icons8.com/color/48/twitter.png" alt="Twitter" className="w-8 h-8" />
+                  <i className="fab fa-twitter text-2xl"></i>
                 </button>
                 <button
-                  onClick={() => {
-                    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(cleanUrl)}`, '_blank');
-                  }}
-                  className="hover:opacity-70 transition-opacity"
+                  onClick={shareWithImage}
+                  className="hover:opacity-70 transition-opacity text-blue-600"
                   aria-label="Share on Facebook"
+                  title="Facebook"
                 >
-                  <img src="https://img.icons8.com/color/48/facebook-new.png" alt="Facebook" className="w-8 h-8" />
+                  <i className="fab fa-facebook text-2xl"></i>
                 </button>
                 <button
-                  onClick={() => {
-                    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(cleanUrl)}`, '_blank');
-                  }}
-                  className="hover:opacity-70 transition-opacity"
+                  onClick={shareWithImage}
+                  className="hover:opacity-70 transition-opacity text-blue-700"
                   aria-label="Share on LinkedIn"
+                  title="LinkedIn"
                 >
-                  <img src="https://img.icons8.com/color/48/linkedin.png" alt="LinkedIn" className="w-8 h-8" />
+                  <i className="fab fa-linkedin text-2xl"></i>
                 </button>
                 <button
                   onClick={() => {
                     const text = `${blog.title}\n${cleanUrl}`;
                     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
                   }}
-                  className="hover:opacity-70 transition-opacity"
+                  className="hover:opacity-70 transition-opacity text-green-500"
                   aria-label="Share on WhatsApp"
+                  title="WhatsApp"
                 >
-                  <img src="https://img.icons8.com/color/48/whatsapp.png" alt="WhatsApp" className="w-8 h-8" />
+                  <i className="fab fa-whatsapp text-2xl"></i>
                 </button>
                 <button
-                  onClick={() => {
-                    alert('Instagram sharing: Open Instagram and share the link in your story or direct message');
-                  }}
-                  className="hover:opacity-70 transition-opacity"
+                  onClick={shareWithImage}
+                  className="hover:opacity-70 transition-opacity text-pink-500"
                   aria-label="Share on Instagram"
+                  title="Instagram"
                 >
-                  <img src="https://img.icons8.com/color/48/instagram-new.png" alt="Instagram" className="w-8 h-8" />
+                  <i className="fab fa-instagram text-2xl"></i>
                 </button>
               </div>
               <div className="flex gap-2">
@@ -712,13 +773,11 @@ export default function BlogDetail() {
               
               <button
                 onClick={shareBlog}
-                className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors text-sm font-medium"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold transition-all duration-300 bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:shadow-lg hover:shadow-teal-300 hover:scale-105 active:scale-95 shadow-md text-sm"
                 aria-label="Share this post"
               >
-                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
-                </svg>
-                Share
+                <i className="fas fa-share-nodes"></i>
+                Share 📤
               </button>
             </div>
 
@@ -789,42 +848,42 @@ export default function BlogDetail() {
               <button
                 onClick={like}
                 disabled={liking || hasLiked}
-                className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg font-medium transition-colors ${
+                className={`inline-flex items-center gap-2 px-5 py-3 rounded-lg font-semibold transition-all duration-200 transform hover:scale-105 active:scale-95 ${
                   hasLiked 
-                    ? 'bg-red-50 text-red-600 cursor-default' 
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-blue-100 text-blue-600 cursor-default' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-blue-100 hover:text-blue-600'
                 }`}
                 aria-label={hasLiked ? "You already liked this post" : "Like this post"}
+                title={hasLiked ? "You already liked this" : "Like this post"}
               >
-                <svg className={`w-5 h-5 ${hasLiked ? 'fill-red-600' : 'fill-current'}`} viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clipRule="evenodd" />
-                </svg>
-                {hasLiked ? 'Liked' : 'Like'} ({blog.likes || 0})
+                <i className={`fas fa-thumbs-up text-lg ${hasLiked ? 'text-blue-600' : ''}`}></i>
+                <span>{blog.likes || 0}</span>
               </button>
               
               <button
                 onClick={toggleBookmark}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-medium"
+                className={`inline-flex items-center gap-2 px-6 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-110 active:scale-95 ${
+                  isBookmarked
+                    ? 'bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-500 text-white shadow-lg shadow-blue-300'
+                    : 'bg-white text-blue-600 border-2 border-blue-500 hover:border-blue-600 hover:bg-blue-50 shadow-lg'
+                }`}
                 aria-label={isBookmarked ? "Remove from bookmarks" : "Bookmark this post"}
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path d={isBookmarked 
-                    ? "M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z" 
-                    : "M5 4a2 2 0 012-2h6a2 2 0 012 2v14l-5-2.5L5 18V4z"
-                  } />
-                </svg>
-                {isBookmarked ? 'Bookmarked' : 'Bookmark'}
+                <i className={`fas fa-bookmark text-xl ${isBookmarked ? 'animate-bounce' : ''}`}></i>
+                <span className="hidden sm:inline">
+                  {isBookmarked ? '📌 Saved!' : '📌 Save'}
+                </span>
               </button>
               
               <button
                 onClick={printBlog}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors font-medium"
+                className="inline-flex items-center gap-2 px-6 py-4 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-110 active:scale-95 bg-white text-purple-600 border-2 border-purple-500 hover:border-purple-600 hover:bg-purple-50 shadow-lg"
                 aria-label="Print this post"
               >
-                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M5 4v3H4a2 2 0 00-2 2v3a2 2 0 002 2h1v2a2 2 0 002 2h6a2 2 0 002-2v-2h1a2 2 0 002-2V9a2 2 0 00-2-2h-1V4a2 2 0 00-2-2H7a2 2 0 00-2 2zm8 0H7v3h6V4zm0 8H7v4h6v-4z" clipRule="evenodd" />
-                </svg>
-                Print
+                <i className="fas fa-print text-xl"></i>
+                <span className="hidden sm:inline">
+                  🖨️ Print
+                </span>
               </button>
             </div>
 
@@ -853,7 +912,7 @@ export default function BlogDetail() {
                     celebrity news and photos. This is your one-stop shop for all entertainment news
                     and insightful articles across business, tech, and lifestyle.
                   </p>
-                  <div className="flex flex-wrap justify-center md:justify-start gap-5">
+                  <div className="flex flex-wrap justify-center md:justify-start gap-3">
                     {['Facebook', 'Instagram', 'X (Twitter)', 'WhatsApp', 'LinkedIn'].map((platform) => (
                       <a
                         key={platform}
@@ -972,22 +1031,28 @@ export default function BlogDetail() {
 // Small helper to render social platform icons as images
 function SocialIcon({ platform }) {
   const name = (platform || '').toLowerCase();
-  let iconUrl = '';
+  let iconClass = '';
+  let colorClass = '';
 
   if (name.includes('facebook')) {
-    iconUrl = 'https://img.icons8.com/color/48/facebook-new.png';
+    iconClass = 'fab fa-facebook';
+    colorClass = 'text-blue-600';
   } else if (name.includes('instagram')) {
-    iconUrl = 'https://img.icons8.com/color/48/instagram-new.png';
+    iconClass = 'fab fa-instagram';
+    colorClass = 'text-pink-500';
   } else if (name.includes('x') || name.includes('twitter')) {
-    iconUrl = 'https://img.icons8.com/color/48/twitter.png';
+    iconClass = 'fab fa-twitter';
+    colorClass = 'text-blue-400';
   } else if (name.includes('whatsapp')) {
-    iconUrl = 'https://img.icons8.com/color/48/whatsapp.png';
+    iconClass = 'fab fa-whatsapp';
+    colorClass = 'text-green-500';
   } else if (name.includes('linkedin')) {
-    iconUrl = 'https://img.icons8.com/color/48/linkedin.png';
+    iconClass = 'fab fa-linkedin';
+    colorClass = 'text-blue-700';
   }
 
-  if (iconUrl) {
-    return <img src={iconUrl} alt={platform} className="w-8 h-8" />;
+  if (iconClass) {
+    return <i className={`${iconClass} ${colorClass} text-2xl w-6 h-6 flex items-center justify-center`}></i>;
   }
 
   // Fallback: simple text
