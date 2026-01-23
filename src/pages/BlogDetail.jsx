@@ -162,6 +162,291 @@ function ReadingProgress() {
   );
 }
 
+// Enhanced ShareModal Component with Image Support
+function EnhancedShareModal({ blog, onClose, cleanUrl, description }) {
+  const [copySuccess, setCopySuccess] = useState(false);
+
+  const shareOnPlatform = (platform) => {
+    const title = encodeURIComponent(blog.title);
+    const url = encodeURIComponent(cleanUrl);
+    const imageUrl = encodeURIComponent(blog.blogImage || blog.image || '');
+    const text = encodeURIComponent(description);
+    
+    switch(platform) {
+      case 'facebook':
+        // Facebook supports image preview via Open Graph tags
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${title}`, '_blank', 'width=600,height=400');
+        break;
+      case 'twitter':
+        // Twitter will show image if Open Graph tags are set correctly
+        window.open(`https://twitter.com/intent/tweet?text=${title}&url=${url}`, '_blank', 'width=600,height=400');
+        break;
+      case 'linkedin':
+        window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank', 'width=600,height=400');
+        break;
+      case 'whatsapp':
+        window.open(`https://wa.me/?text=${title}%0A%0A${url}`, '_blank', 'width=600,height=400');
+        break;
+      case 'pinterest':
+        // Pinterest supports direct image pinning
+        window.open(`https://pinterest.com/pin/create/button/?url=${url}&media=${imageUrl}&description=${title}`, '_blank', 'width=750,height=600');
+        break;
+      case 'telegram':
+        window.open(`https://t.me/share/url?url=${url}&text=${title}`, '_blank', 'width=600,height=400');
+        break;
+      case 'reddit':
+        window.open(`https://www.reddit.com/submit?url=${url}&title=${title}`, '_blank', 'width=850,height=600');
+        break;
+      case 'email':
+        const subject = encodeURIComponent(blog.title);
+        const body = encodeURIComponent(`Check out this blog post:\n\n${blog.title}\n\n${description}\n\nRead more: ${cleanUrl}`);
+        window.open(`mailto:?subject=${subject}&body=${body}`, '_blank');
+        break;
+      case 'native':
+        // Use Web Share API if available (supports images on mobile)
+        if (navigator.share) {
+          navigator.share({
+            title: blog.title,
+            text: description,
+            url: cleanUrl,
+          }).catch(err => console.log('Error sharing:', err));
+        } else {
+          alert('Web Share API not supported on this browser.');
+        }
+        break;
+      default:
+        break;
+    }
+  };
+
+  const copyToClipboard = () => {
+    navigator.clipboard.writeText(cleanUrl)
+      .then(() => {
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 2000);
+      })
+      .catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy link');
+      });
+  };
+
+  const downloadImage = () => {
+    if (blog.blogImage) {
+      const link = document.createElement('a');
+      link.href = blog.blogImage;
+      link.download = `blog-image-${generateSlug(blog.title)}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl max-w-md w-full mx-auto shadow-2xl">
+        <div className="p-6">
+          {/* Header */}
+          <div className="flex justify-between items-center mb-6">
+            <h3 className="text-xl font-bold text-gray-900">Share This Post</h3>
+            <button 
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 p-2 hover:bg-gray-100 rounded-full transition-colors"
+              aria-label="Close"
+            >
+              <i className="fas fa-times text-lg"></i>
+            </button>
+          </div>
+          
+          {/* Blog Preview Card with Image */}
+          <div className="mb-6 overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-gray-50 to-white">
+            {blog.blogImage ? (
+              <div className="relative">
+                <img 
+                  src={blog.blogImage} 
+                  alt={blog.title}
+                  className="w-full h-48 object-cover"
+                />
+                <button
+                  onClick={downloadImage}
+                  className="absolute top-3 right-3 bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors shadow-sm"
+                  aria-label="Download image"
+                  title="Download image"
+                >
+                  <i className="fas fa-download text-gray-700"></i>
+                </button>
+              </div>
+            ) : (
+              <div className="w-full h-48 bg-gradient-to-r from-blue-100 to-cyan-100 flex items-center justify-center">
+                <i className="fas fa-image text-4xl text-gray-400"></i>
+              </div>
+            )}
+            <div className="p-4">
+              <h4 className="font-bold text-gray-900 mb-2 line-clamp-2">{blog.title}</h4>
+              {description && (
+                <p className="text-sm text-gray-600 line-clamp-2">{description}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Share Buttons Grid */}
+          <div className="mb-6">
+            <p className="text-sm text-gray-600 mb-4 text-center">Share on social media:</p>
+            <div className="grid grid-cols-4 gap-3">
+              {/* Facebook */}
+              <button
+                onClick={() => shareOnPlatform('facebook')}
+                className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                aria-label="Share on Facebook"
+                title="Facebook"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-2 transition-colors">
+                  <i className="fab fa-facebook-f text-blue-600 text-lg"></i>
+                </div>
+                <span className="text-xs font-medium text-gray-700">Facebook</span>
+              </button>
+              
+              {/* Twitter */}
+              <button
+                onClick={() => shareOnPlatform('twitter')}
+                className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                aria-label="Share on Twitter"
+                title="Twitter"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-2 transition-colors">
+                  <i className="fab fa-twitter text-blue-400 text-lg"></i>
+                </div>
+                <span className="text-xs font-medium text-gray-700">Twitter</span>
+              </button>
+              
+              {/* LinkedIn */}
+              <button
+                onClick={() => shareOnPlatform('linkedin')}
+                className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                aria-label="Share on LinkedIn"
+                title="LinkedIn"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-2 transition-colors">
+                  <i className="fab fa-linkedin-in text-blue-700 text-lg"></i>
+                </div>
+                <span className="text-xs font-medium text-gray-700">LinkedIn</span>
+              </button>
+              
+              {/* WhatsApp */}
+              <button
+                onClick={() => shareOnPlatform('whatsapp')}
+                className="flex flex-col items-center p-3 bg-green-50 rounded-xl hover:bg-green-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                aria-label="Share on WhatsApp"
+                title="WhatsApp"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-green-100 group-hover:bg-green-200 mb-2 transition-colors">
+                  <i className="fab fa-whatsapp text-green-600 text-lg"></i>
+                </div>
+                <span className="text-xs font-medium text-gray-700">WhatsApp</span>
+              </button>
+              
+              {/* Pinterest */}
+              <button
+                onClick={() => shareOnPlatform('pinterest')}
+                className="flex flex-col items-center p-3 bg-red-50 rounded-xl hover:bg-red-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                aria-label="Share on Pinterest"
+                title="Pinterest"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-red-100 group-hover:bg-red-200 mb-2 transition-colors">
+                  <i className="fab fa-pinterest-p text-red-600 text-lg"></i>
+                </div>
+                <span className="text-xs font-medium text-gray-700">Pinterest</span>
+              </button>
+              
+              {/* Telegram */}
+              <button
+                onClick={() => shareOnPlatform('telegram')}
+                className="flex flex-col items-center p-3 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                aria-label="Share on Telegram"
+                title="Telegram"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-blue-100 group-hover:bg-blue-200 mb-2 transition-colors">
+                  <i className="fab fa-telegram text-blue-500 text-lg"></i>
+                </div>
+                <span className="text-xs font-medium text-gray-700">Telegram</span>
+              </button>
+              
+              {/* Email */}
+              <button
+                onClick={() => shareOnPlatform('email')}
+                className="flex flex-col items-center p-3 bg-gray-50 rounded-xl hover:bg-gray-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                aria-label="Share via Email"
+                title="Email"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-gray-100 group-hover:bg-gray-200 mb-2 transition-colors">
+                  <i className="fas fa-envelope text-gray-600 text-lg"></i>
+                </div>
+                <span className="text-xs font-medium text-gray-700">Email</span>
+              </button>
+              
+              {/* Native Share */}
+              <button
+                onClick={() => shareOnPlatform('native')}
+                className="flex flex-col items-center p-3 bg-purple-50 rounded-xl hover:bg-purple-100 transition-all duration-300 hover:scale-105 active:scale-95 group"
+                aria-label="Share via device"
+                title="Device Share"
+              >
+                <div className="w-10 h-10 flex items-center justify-center rounded-full bg-purple-100 group-hover:bg-purple-200 mb-2 transition-colors">
+                  <i className="fas fa-share-alt text-purple-600 text-lg"></i>
+                </div>
+                <span className="text-xs font-medium text-gray-700">More</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Copy Link Section */}
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 mb-2">Or copy link:</p>
+            <div className="flex gap-2">
+              <div className="flex-1 relative">
+                <input
+                  type="text"
+                  value={cleanUrl}
+                  readOnly
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-lg text-sm bg-gray-50 pr-24"
+                />
+                <button
+                  onClick={copyToClipboard}
+                  className={`absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-1.5 rounded-md font-medium transition-colors ${copySuccess ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-600 hover:bg-blue-200'}`}
+                  aria-label="Copy link to clipboard"
+                >
+                  {copySuccess ? (
+                    <>
+                      <i className="fas fa-check mr-1"></i>
+                      Copied!
+                    </>
+                  ) : (
+                    <>
+                      <i className="fas fa-copy mr-1"></i>
+                      Copy
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Note about image sharing */}
+          <div className="text-xs text-gray-500 bg-gray-50 p-3 rounded-lg">
+            <p className="flex items-start">
+              <i className="fas fa-info-circle text-blue-500 mr-2 mt-0.5"></i>
+              <span>
+                Images are shared automatically via Open Graph tags on most platforms. 
+                Pinterest supports direct image pinning. Ensure your Open Graph tags are properly configured.
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function BlogDetail() {
   const { slug } = useParams();
   const [searchParams] = useSearchParams();
@@ -177,6 +462,11 @@ export default function BlogDetail() {
   const [headings, setHeadings] = useState([]);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [views, setViews] = useState(0);
+
+  // Define these at the top level to avoid hoisting issues
+  const tags = blog ? getSafeTags(blog.tags) : [];
+  const cleanUrl = blog ? `https://sjwrites.com/${generateSlug(blog.title)}` : '';
+  const description = blog ? (blog.excerpt || markdownToPlainText(blog.content)) : '';
 
   // Use resolvedId internally (either from query param or from loaded blog)
   const resolvedId = blogId || (blog && blog._id);
@@ -420,46 +710,6 @@ export default function BlogDetail() {
     navigate(`/blogs?tag=${encodeURIComponent(tag)}`);
   };
 
-  // Helper function to share with image
-  const shareWithImage = async () => {
-    if (!navigator.share) {
-      alert('Web Share API not supported. Please use the individual share buttons.');
-      return;
-    }
-
-    try {
-      let shareData = {
-        title: blog.title,
-        text: description,
-        url: cleanUrl
-      };
-
-      // If blog has an image and Web Share API supports files, include the image
-      if (blog.blogImage && navigator.canShare) {
-        const response = await fetch(blog.blogImage);
-        const blob = await response.blob();
-        const file = new File([blob], 'blog-image.jpg', { type: blob.type });
-        
-        if (navigator.canShare({ files: [file] })) {
-          shareData.files = [file];
-        }
-      }
-
-      await navigator.share(shareData);
-    } catch (error) {
-      if (error.name !== 'AbortError') {
-        console.error('Share failed:', error);
-      }
-    }
-  };
-
-  // Safely get tags from blog object
-  const tags = blog ? getSafeTags(blog.tags) : [];
-
-  // Generate clean URL for this blog
-  const cleanUrl = blog ? `https://sjwrites.com/${generateSlug(blog.title)}` : '';
-  const description = blog ? (blog.excerpt || markdownToPlainText(blog.content)) : '';
-
   if (loading) {
     return (
       <>
@@ -507,17 +757,27 @@ export default function BlogDetail() {
         <title>{blog.title} - SJWrites</title>
         <meta name="description" content={description} />
         
-        {/* 🟢 Open Graph tags */}
+        {/* 🟢 Open Graph tags (CRITICAL FOR IMAGE SHARING) */}
         <meta property="og:title" content={blog.title} />
         <meta property="og:description" content={description} />
         <meta property="og:image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
         <meta property="og:image:type" content="image/jpeg" />
+        <meta property="og:image:alt" content={blog.title} />
         <meta property="og:url" content={cleanUrl} />
         <meta property="og:type" content="article" />
         <meta property="og:site_name" content="SJWrites" />
         <meta property="og:locale" content="en_US" />
+        
+        {/* 🟢 Twitter Card (CRITICAL FOR TWITTER SHARING) */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={blog.title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
+        <meta name="twitter:image:alt" content={blog.title} />
+        <meta name="twitter:site" content="@sjwrites" />
+        <meta name="twitter:creator" content="@sjwrites" />
         
         {/* 🟢 Google-specific image meta tags */}
         <meta name="image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
@@ -530,13 +790,6 @@ export default function BlogDetail() {
         {tags.map(tag => (
           <meta key={tag} property="article:tag" content={tag} />
         ))}
-        
-        {/* 🟢 Twitter Card */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={blog.title} />
-        <meta name="twitter:description" content={description} />
-        <meta name="twitter:image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
-        <meta name="twitter:image:alt" content={blog.title} />
         
         {/* 🟢 BlogPosting Schema (MOST IMPORTANT FOR INDEXING) */}
         <script type="application/ld+json">
@@ -614,95 +867,14 @@ export default function BlogDetail() {
       
       <ReadingProgress />
       
-      {/* Share Modal */}
+      {/* Enhanced Share Modal */}
       {showShareModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-md w-full mx-auto">
-            <div className="p-6">
-              <h3 className="text-lg font-semibold mb-4">Share this post</h3>
-              
-              {/* Blog Preview Card */}
-              {blog.blogImage && (
-                <div className="mb-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                  <img 
-                    src={blog.blogImage} 
-                    alt={blog.title}
-                    className="w-full h-32 object-cover rounded mb-2"
-                  />
-                  <p className="text-sm font-medium text-gray-900 line-clamp-2">{blog.title}</p>
-                </div>
-              )}
-              
-              <div className="flex gap-4 justify-center mb-6 flex-wrap">
-                <button
-                  onClick={shareWithImage}
-                  className="hover:opacity-70 transition-opacity text-blue-400"
-                  aria-label="Share on X (Twitter)"
-                  title="Twitter"
-                >
-                  <i className="fab fa-twitter text-2xl"></i>
-                </button>
-                <button
-                  onClick={shareWithImage}
-                  className="hover:opacity-70 transition-opacity text-blue-600"
-                  aria-label="Share on Facebook"
-                  title="Facebook"
-                >
-                  <i className="fab fa-facebook text-2xl"></i>
-                </button>
-                <button
-                  onClick={shareWithImage}
-                  className="hover:opacity-70 transition-opacity text-blue-700"
-                  aria-label="Share on LinkedIn"
-                  title="LinkedIn"
-                >
-                  <i className="fab fa-linkedin text-2xl"></i>
-                </button>
-                <button
-                  onClick={() => {
-                    const text = `${blog.title}\n${cleanUrl}`;
-                    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
-                  }}
-                  className="hover:opacity-70 transition-opacity text-green-500"
-                  aria-label="Share on WhatsApp"
-                  title="WhatsApp"
-                >
-                  <i className="fab fa-whatsapp text-2xl"></i>
-                </button>
-                <button
-                  onClick={shareWithImage}
-                  className="hover:opacity-70 transition-opacity text-pink-500"
-                  aria-label="Share on Instagram"
-                  title="Instagram"
-                >
-                  <i className="fab fa-instagram text-2xl"></i>
-                </button>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={cleanUrl}
-                  readOnly
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm"
-                />
-                <button
-                  onClick={copyLink}
-                  className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300 transition-colors"
-                  aria-label="Copy link to clipboard"
-                >
-                  Copy
-                </button>
-              </div>
-              <button 
-                onClick={() => setShowShareModal(false)}
-                className="w-full mt-4 py-2 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors"
-                aria-label="Close share modal"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
+        <EnhancedShareModal 
+          blog={blog}
+          cleanUrl={cleanUrl}
+          description={description}
+          onClose={() => setShowShareModal(false)}
+        />
       )}
 
       <div className="max-w-7xl mx-auto px-4 py-8">
