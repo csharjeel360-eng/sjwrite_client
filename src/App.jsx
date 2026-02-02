@@ -15,6 +15,8 @@ import RegisterForm from './pages/RegisterForm';
 // BlogList removed — blogs are shown on Home now
 import About from './pages/About';
 import PrivacyPolicy from './pages/PrivcayPolicy';
+import TermsOfService from './pages/TermsOfService';
+import Disclaimer from './pages/Disclaimer';
 import ContactUs from './pages/ContactUs';
 import { api } from './api/client';
 
@@ -166,6 +168,18 @@ export default function App() {
           <>
             <PageTitle title="Privacy Policy" />
             <PrivacyPolicy />
+          </>
+        } />
+        <Route path="/terms" element={
+          <>
+            <PageTitle title="Terms of Service" />
+            <TermsOfService />
+          </>
+        } />
+        <Route path="/disclaimer" element={
+          <>
+            <PageTitle title="Disclaimer" />
+            <Disclaimer />
           </>
         } />
         

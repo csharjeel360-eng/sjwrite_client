@@ -15,6 +15,20 @@ export default function Footer() {
           </Link>
           
           <Link 
+            to="/terms" 
+            className="px-3 py-1 text-sm rounded text-black hover:text-gray-800 hover:underline"
+          >
+            Terms of Service
+          </Link>
+
+          <Link 
+            to="/disclaimer" 
+            className="px-3 py-1 text-sm rounded text-black hover:text-gray-800 hover:underline"
+          >
+            Disclaimer
+          </Link>
+          
+          <Link 
             to="/about" 
             className="px-3 py-1 text-sm rounded text-black hover:text-gray-800 hover:underline"
           >
