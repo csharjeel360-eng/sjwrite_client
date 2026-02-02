@@ -180,12 +180,12 @@ export default function Home() {
         <link rel="canonical" href="https://sjwrites.com" />
         
         {/* 🟢 Homepage title & description */}
-        <title>SJWrites - Entertaining & Trending Stories and Much More</title>
-        <meta name="description" content="Explore the latest tech blogs on SJWrites featuring AI, apps, software, gadgets, and digital innovation." />
+        <title>SJWrites – AI Tools, Tech Guides & Digital Trends Blog</title>
+        <meta name="description" content="SJWrites is a tech blog covering AI tools, digital trends, software guides, and practical technology tips for beginners and professionals." />
         
         {/* 🟢 Open Graph for homepage */}
-        <meta property="og:title" content="SJWrites - Entertaining & Trending Stories and Much More" />
-        <meta property="og:description" content="Your one-stop shop for entertainment news, stories, videos, and more." />
+        <meta property="og:title" content="SJWrites – AI Tools, Tech Guides & Digital Trends Blog" />
+        <meta property="og:description" content="SJWrites is a tech blog covering AI tools, digital trends, software guides, and practical technology tips for beginners and professionals." />
         <meta property="og:image" content={featuredPost?.blogImage || "https://sjwrites.com/default-og.jpg"} />
         <meta property="og:url" content="https://sjwrites.com" />
         <meta property="og:type" content="website" />
@@ -194,8 +194,8 @@ export default function Home() {
         
         {/* 🟢 Twitter Card */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="SJWrites - Entertaining & Trending Stories" />
-        <meta name="twitter:description" content="Your one-stop shop for entertainment news" />
+        <meta name="twitter:title" content="SJWrites – AI Tools, Tech Guides & Digital Trends Blog" />
+        <meta name="twitter:description" content="SJWrites is a tech blog covering AI tools, digital trends, software guides, and practical technology tips for beginners and professionals." />
         <meta name="twitter:image" content={featuredPost?.blogImage || "https://sjwrites.com/default-og.jpg"} />
         
         {/* 🟢 Website Schema - ESSENTIAL for homepage */}
@@ -205,7 +205,7 @@ export default function Home() {
             "@type": "WebSite",
             "url": "https://sjwrites.com",
             "name": "SJWrites",
-            "description": "Entertaining & Trending Stories, Fun Videos, Celebrity News and Photos",
+            "description": "SJWrites is a tech blog covering AI tools, digital trends, software guides, and practical technology tips for beginners and professionals.",
             "publisher": {
               "@type": "Organization",
               "name": "SJWrites",
@@ -231,7 +231,7 @@ export default function Home() {
             "@context": "https://schema.org",
             "@type": "CollectionPage",
             "name": "Latest Blog Posts - SJWrites",
-            "description": "Latest entertaining and trending stories from SJWrites",
+            "description": "SJWrites – AI Tools, Tech Guides & Digital Trends Blog",
             "url": "https://sjwrites.com",
             "mainEntity": {
               "@type": "ItemList",
