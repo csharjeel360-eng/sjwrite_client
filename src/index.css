@@ -11,19 +11,22 @@
 .markdown-content h1 {
   font-size: 2.25rem;
   font-weight: bold;
-  margin: 1rem 0;
+  margin-top: 1rem;
+  margin-bottom: 0;
 }
 
 .markdown-content h2 {
   font-size: 1.875rem;
   font-weight: bold;
-  margin: 0.75rem 0;
+  margin-top: 0.75rem;
+  margin-bottom: 0;
 }
 
 .markdown-content h3 {
   font-size: 1.5rem;
   font-weight: bold;
-  margin: 0.5rem 0;
+  margin-top: 0.5rem;
+  margin-bottom: 0;
 }
 
 .markdown-content p {
@@ -45,6 +48,41 @@
 
 .markdown-content a:hover {
   color: #111827;
+}
+
+/* Remove automatic top/bottom spacing for headings in admin preview */
+.no-heading-space h1,
+.no-heading-space h2,
+.no-heading-space h3,
+/* also target any nested prose wrappers */
+.no-heading-space .prose h1,
+.no-heading-space .prose h2,
+.no-heading-space .prose h3 {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  padding: 0 !important;
+}
+
+/* Override Tailwind Typography (prose) bottom margins for headings */
+.prose h1,
+.prose h2,
+.prose h3 {
+  margin-bottom: 0 !important;
+}
+
+/* Strong global override: remove automatic top/bottom spacing for headings and paragraphs
+   in markdown-rendered content and Tailwind `prose` areas. This prevents extra gaps
+   before/after headings and paragraphs. */
+.markdown-content h1,
+.markdown-content h2,
+.markdown-content h3,
+.markdown-content p,
+.prose h1,
+.prose h2,
+.prose h3,
+.prose p {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
 }
 
 /* nemopani-style blog cards */

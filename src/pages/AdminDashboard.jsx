@@ -188,8 +188,9 @@ function RichTextEditor({ value, onChange, placeholder }) {
           
           // Convert markdown to HTML for non-image content
           const html = part
-            .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold my-2">$1</h1>')
-            .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold my-2">$1</h2>')
+            .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold">$1</h1>')
             .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
             .replace(/\*(.*?)\*/g, '<em>$1</em>')
             .replace(/_(.*?)_/g, '<em>$1</em>')
@@ -375,7 +376,7 @@ function RichTextEditor({ value, onChange, placeholder }) {
       {/* Preview */}
       <div className="p-3 border-t bg-gray-50">
         <h4 className="text-sm font-semibold mb-2">Preview:</h4>
-        <div className="text-sm text-gray-600 prose max-w-none">
+        <div className="text-sm text-gray-600 prose max-w-none no-heading-space">
           {renderMarkdownPreview(value)}
         </div>
       </div>

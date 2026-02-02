@@ -12,17 +12,17 @@ export default function MarkdownRenderer({ content }) {
       
       // Check for headings
       if (paragraph.startsWith('# ')) {
-        return <h1 key={index} className="text-3xl font-bold my-4">{paragraph.substring(2)}</h1>;
+        return <h1 key={index} className="text-3xl font-bold">{paragraph.substring(2)}</h1>;
       }
       if (paragraph.startsWith('## ')) {
-        return <h2 key={index} className="text-2xl font-bold my-3">{paragraph.substring(3)}</h2>;
+        return <h2 key={index} className="text-2xl font-bold">{paragraph.substring(3)}</h2>;
       }
       if (paragraph.startsWith('### ')) {
-        return <h3 key={index} className="text-xl font-bold my-2">{paragraph.substring(4)}</h3>;
+        return <h3 key={index} className="text-xl font-bold">{paragraph.substring(4)}</h3>;
       }
 
       // Process inline formatting within the paragraph
-      return <p key={index} className="my-3 leading-relaxed">{processInlineFormatting(paragraph)}</p>;
+      return <p key={index} className="leading-relaxed">{processInlineFormatting(paragraph)}</p>;
     });
   };
 

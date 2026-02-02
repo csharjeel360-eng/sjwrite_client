@@ -84,17 +84,17 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
         .replace(/^# (.*$)/gim, (match, title) => {
           const id = `heading-${headingIndex++}`;
           headings.push({ id, title, level: 1 });
-          return `<h1 id="${id}" class="text-2xl md:text-3xl font-bold my-4 md:my-6 scroll-mt-20">${title}</h1>`;
+          return `<h1 id="${id}" class="text-2xl md:text-3xl font-bold scroll-mt-20">${title}</h1>`;
         })
         .replace(/^## (.*$)/gim, (match, title) => {
           const id = `heading-${headingIndex++}`;
           headings.push({ id, title, level: 2 });
-          return `<h2 id="${id}" class="text-xl md:text-2xl font-bold my-3 md:my-5 scroll-mt-20">${title}</h2>`;
+          return `<h2 id="${id}" class="text-xl md:text-2xl font-bold scroll-mt-20">${title}</h2>`;
         })
         .replace(/^### (.*$)/gim, (match, title) => {
           const id = `heading-${headingIndex++}`;
           headings.push({ id, title, level: 3 });
-          return `<h3 id="${id}" class="text-lg md:text-xl font-bold my-2 md:my-4 scroll-mt-20">${title}</h3>`;
+          return `<h3 id="${id}" class="text-lg md:text-xl font-bold scroll-mt-20">${title}</h3>`;
         })
         .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
         .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
@@ -103,7 +103,7 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
         .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-black hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
         .replace(/\n\n/g, '</p><p>')
         .replace(/\n/g, '<br />')
-        .replace(/<p>(.*?)<\/p>/g, '<p class="mb-4 leading-relaxed text-gray-700">$1</p>')
+        .replace(/<p>(.*?)<\/p>/g, '<p class="leading-relaxed text-gray-700">$1</p>')
         .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4 border"><code class="block whitespace-pre">$2</code></pre>')
         .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono border">$1</code>')
         .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 py-2 my-4 bg-gray-50 italic">$1</blockquote>');
@@ -965,18 +965,17 @@ export default function BlogDetail() {
                   height="675"
                 />
                 
-                {/* Tags overlay */}
+                {/* Tags overlay (non-clickable on detail page) */}
                 {tags.length > 0 && (
                   <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">
                     {tags.slice(0, 4).map((tag, index) => (
-                      <button
+                      <span
                         key={index}
-                        onClick={() => navigateToTag(tag)}
-                        className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/80 text-white backdrop-blur-sm hover:bg-black transition-colors"
-                        aria-label={`Browse more posts about ${tag}`}
+                        className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/80 text-white backdrop-blur-sm"
+                        aria-hidden="true"
                       >
                         #{tag}
-                      </button>
+                      </span>
                     ))}
                     {tags.length > 4 && (
                       <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/80 text-white backdrop-blur-sm">
@@ -996,20 +995,18 @@ export default function BlogDetail() {
               />
             </div>
 
-            {/* Tags Section */}
+            {/* Tags Section (non-clickable; heading removed) */}
             {tags.length > 0 && (
               <div className="mb-10 pt-8 border-t">
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Topics in this article:</h2>
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag, index) => (
-                    <button
+                    <span
                       key={index}
-                      onClick={() => navigateToTag(tag)}
-                      className="inline-flex items-center px-4 py-2 rounded-lg text-sm bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
-                      aria-label={`Browse more posts about ${tag}`}
+                      className="inline-flex items-center px-4 py-2 rounded-lg text-sm bg-gray-100 text-gray-700"
+                      aria-hidden="true"
                     >
                       #{tag}
-                    </button>
+                    </span>
                   ))}
                 </div>
               </div>
