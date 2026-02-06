@@ -39,7 +39,7 @@ const BlogCard = ({ blog, size = 'normal', showExcerpt = false, cleanUrl = false
       <Link to={blogUrl} className="block">
         <img
           src={blog.blogImage}
-          alt={`${blog.title} - Featured image`}
+          alt={blog.blogImageAlt || `${blog.title} - Featured image`}
           className="w-full h-48 object-cover"
           loading="lazy"
           width="400"

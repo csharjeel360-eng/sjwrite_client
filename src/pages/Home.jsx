@@ -318,7 +318,7 @@ export default function Home() {
                         {featuredPost.blogImage && (
                           <img
                             src={featuredPost.blogImage}
-                            alt={`${featuredPost.title} - Featured image on SJWrites`}
+                            alt={featuredPost.blogImageAlt || `${featuredPost.title} - Featured image on SJWrites`}
                             className="w-full h-96 object-cover lazyloaded rounded-lg"
                             loading="eager"
                             width="1200"

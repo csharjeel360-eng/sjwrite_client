@@ -146,6 +146,21 @@ export const api = {
     return handleResponse(res);
   },
 
+  // Upload an image directly to a blog (updates blog image field and optional alt)
+  async uploadBlogImage(blogId, file, imageType = 'blogImage', imageAlt = '', token) {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('imageType', imageType);
+    if (imageAlt) formData.append('imageAlt', imageAlt);
+
+    const res = await fetchWithErrorLogging(`${API_BASE}blogs/${encodeURIComponent(blogId)}/upload-image`, {
+      method: 'POST',
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+    return handleResponse(res);
+  },
+
   async incrementView(id) {
     const res = await fetchWithErrorLogging(`${API_BASE}blogs/${id}/view`, {
       method: 'POST',

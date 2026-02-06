@@ -393,6 +393,7 @@ function DashboardInner() {
     content: '', 
     tags: '', 
     blogImage: '',
+    blogImageAlt: '',
     metaTitle: '',
     metaDescription: ''
   });
@@ -427,6 +428,7 @@ function DashboardInner() {
       title: form.title.trim(),
       content: form.content,
       blogImage: form.blogImage || undefined,
+      blogImageAlt: form.blogImageAlt?.trim() || undefined,
       tags: tagsArray, // Use the properly formatted array
       metaTitle: form.metaTitle.trim() || undefined,
       metaDescription: form.metaDescription.trim() || undefined
@@ -439,7 +441,7 @@ function DashboardInner() {
       } else {
         await api.createBlog(payload, token);
       }
-      setForm({ title: '', content: '', tags: '', blogImage: '', metaTitle: '', metaDescription: '' });
+      setForm({ title: '', content: '', tags: '', blogImage: '', blogImageAlt: '', metaTitle: '', metaDescription: '' });
       setEditing(null);
       await load();
     } catch (error) {
@@ -456,6 +458,7 @@ function DashboardInner() {
       content: b.content,
       tags: (b.tags || []).join(', '),
       blogImage: b.blogImage || '',
+      blogImageAlt: b.blogImageAlt || '',
       metaTitle: b.metaTitle || '',
       metaDescription: b.metaDescription || ''
     });
@@ -555,12 +558,23 @@ function DashboardInner() {
                 onUploaded={(url) => setForm({ ...form, blogImage: url })} 
                 disabled={loading}
               />
+              <div className="mt-2 space-y-2">
+                <label className="block text-sm font-medium text-gray-700">Image Alt Text (optional)</label>
+                <input
+                  type="text"
+                  className="w-full border rounded px-3 py-2"
+                  placeholder="Describe the image for accessibility"
+                  value={form.blogImageAlt}
+                  onChange={(e) => setForm({ ...form, blogImageAlt: e.target.value })}
+                  disabled={loading}
+                />
+              </div>
               {form.blogImage && (
                 <div className="mt-2">
-                  <img src={form.blogImage} className="w-full h-48 object-cover rounded border" alt="Preview" />
+                  <img src={form.blogImage} className="w-full h-48 object-cover rounded border" alt={form.blogImageAlt || form.title || 'Preview'} />
                   <button
                     type="button"
-                    onClick={() => setForm({ ...form, blogImage: '' })}
+                    onClick={() => setForm({ ...form, blogImage: '', blogImageAlt: '' })}
                     className="mt-2 text-sm text-red-600 hover:text-red-800"
                     disabled={loading}
                   >
@@ -604,7 +618,7 @@ function DashboardInner() {
             {blogs.map(b => (
               <div key={b._id} className="bg-white rounded shadow p-4 flex flex-col md:flex-row md:items-start gap-4">
                 {b.blogImage && (
-                  <img src={b.blogImage} className="w-32 h-24 object-cover rounded" alt={b.title} />
+                  <img src={b.blogImage} className="w-32 h-24 object-cover rounded" alt={b.blogImageAlt || b.title} />
                 )}
                 <div className="flex-1">
                   <h3 className="font-bold text-lg mb-1">{b.title}</h3>
