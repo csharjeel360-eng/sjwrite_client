@@ -75,46 +75,90 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
       // First, extract and cache all images
       let processedText = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
         const placeholder = `XIMG${imageIndex}X`;
-        imageCache[placeholder] = `<img src="${src}" alt="${alt}" class="max-w-full h-auto rounded my-4 border object-cover" style="display:block;" />`;
+        imageCache[placeholder] = `<img src="${src}" alt="${alt}" style="max-width:100%;height:auto;border-radius:0.5rem;margin-top:1rem;margin-bottom:1rem;border:1px solid #d1d5db;display:block;object-fit:cover" />`;
         imageIndex++;
         return placeholder;
       });
 
+      // Convert code blocks BEFORE other processing to preserve content
+      processedText = processedText.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, lang, code) => {
+        const placeholder = `XCODE${imageIndex}X`;
+        imageCache[placeholder] = `<pre style="background-color:#f3f4f6;padding:1rem;border-radius:0.5rem;overflow-x:auto;margin-top:1rem;margin-bottom:1rem;border:1px solid #d1d5db"><code style="display:block;white-space:pre;font-family:monospace">${code.trim()}</code></pre>`;
+        imageIndex++;
+        return placeholder;
+      });
+
+      // Convert block-level elements (headings, blockquotes) first, preserving them from paragraph wrapping
+      let blockCache = {};
+      let blockIndex = 0;
+
       processedText = processedText
-        .replace(/^# (.*$)/gim, (match, title) => {
+        .replace(/^\s*#\s+(.*$)/gim, (match, title) => {
           const id = `heading-${headingIndex++}`;
           headings.push({ id, title, level: 1 });
-          return `<h1 id="${id}" class="text-2xl md:text-3xl font-bold scroll-mt-20">${title}</h1>`;
+          const placeholder = `XBLOCK${blockIndex}X`;
+          blockCache[placeholder] = `<h1 id="${id}" style="font-size:1.875rem;font-weight:bold;scroll-margin-top:5rem;margin-top:1.5rem;margin-bottom:1rem">${title}</h1>`;
+          blockIndex++;
+          return placeholder;
         })
-        .replace(/^## (.*$)/gim, (match, title) => {
+        .replace(/^\s*##\s+(.*$)/gim, (match, title) => {
           const id = `heading-${headingIndex++}`;
           headings.push({ id, title, level: 2 });
-          return `<h2 id="${id}" class="text-xl md:text-2xl font-bold scroll-mt-20">${title}</h2>`;
+          const placeholder = `XBLOCK${blockIndex}X`;
+          blockCache[placeholder] = `<h2 id="${id}" style="font-size:1.5rem;font-weight:bold;scroll-margin-top:5rem;margin-top:1.25rem;margin-bottom:0.75rem">${title}</h2>`;
+          blockIndex++;
+          return placeholder;
         })
-        .replace(/^### (.*$)/gim, (match, title) => {
+        .replace(/^\s*###\s+(.*$)/gim, (match, title) => {
           const id = `heading-${headingIndex++}`;
           headings.push({ id, title, level: 3 });
-          return `<h3 id="${id}" class="text-lg md:text-xl font-bold scroll-mt-20">${title}</h3>`;
+          const placeholder = `XBLOCK${blockIndex}X`;
+          blockCache[placeholder] = `<h3 id="${id}" style="font-size:1.125rem;font-weight:bold;scroll-margin-top:5rem;margin-top:1rem;margin-bottom:0.5rem">${title}</h3>`;
+          blockIndex++;
+          return placeholder;
         })
-        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
-        .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>')
-        .replace(/_(.*?)_/g, '<em class="italic">$1</em>')
-        .replace(/~~(.*?)~~/g, '<del class="line-through">$1</del>')
-        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-black hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
-        .replace(/\n\n/g, '</p><p>')
-        .replace(/\n/g, '<br />')
-        .replace(/<p>(.*?)<\/p>/g, '<p class="leading-relaxed text-gray-700">$1</p>')
-        .replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre class="bg-gray-100 p-4 rounded-lg overflow-x-auto my-4 border"><code class="block whitespace-pre">$2</code></pre>')
-        .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1.5 py-0.5 rounded text-sm font-mono border">$1</code>')
-        .replace(/^> (.*$)/gim, '<blockquote class="border-l-4 border-gray-300 pl-4 py-2 my-4 bg-gray-50 italic">$1</blockquote>');
+        .replace(/^>\s*(.*$)/gim, (match, quote) => {
+          const placeholder = `XBLOCK${blockIndex}X`;
+          blockCache[placeholder] = `<blockquote style="border-left:4px solid #d1d5db;padding-left:1rem;padding-top:0.5rem;padding-bottom:0.5rem;margin-top:1rem;margin-bottom:1rem;background-color:#f9fafb;font-style:italic">${quote}</blockquote>`;
+          blockIndex++;
+          return placeholder;
+        });
 
-      // Now restore all cached images and clean up paragraph wrapping around them
-      Object.entries(imageCache).forEach(([placeholder, imageHtml]) => {
-        processedText = processedText.replace(placeholder, imageHtml);
+      // Now apply inline formatting
+      processedText = processedText
+        .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight:bold">$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em style="font-style:italic">$1</em>')
+        .replace(/_(.*?)_/g, '<em style="font-style:italic">$1</em>')
+        .replace(/~~(.*?)~~/g, '<del style="text-decoration:line-through">$1</del>')
+        .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color:#000;text-decoration:underline" target="_blank" rel="noopener noreferrer">$1</a>')
+        .replace(/`([^`]+)`/g, '<code style="background-color:#f3f4f6;padding:0.125rem 0.375rem;border-radius:0.25rem;font-size:0.875rem;font-family:monospace;border:1px solid #d1d5db">$1</code>');
+
+      // Handle newlines: convert \n\n to paragraph breaks, \n to <br /> within paragraphs
+      const lines = processedText.split(/\n\n+/);
+      processedText = lines.map(line => {
+        // Skip empty lines and block placeholders
+        if (!line.trim() || /^XBLOCK|^XCODE|^XIMG/.test(line.trim())) {
+          return line;
+        }
+        // Replace single newlines with <br /> within text
+        const withBreaks = line.replace(/\n/g, '<br />');
+        // Wrap in paragraph tag with inline styles (add explicit margins)
+        return `<p style="line-height:1.5;color:#374151;margin-top:0.5rem;margin-bottom:1rem">${withBreaks}</p>`;
+      }).join('');
+
+      // Restore all cached block elements, images, and code blocks
+      Object.entries(blockCache).forEach(([placeholder, blockHtml]) => {
+        processedText = processedText.replace(placeholder, blockHtml);
       });
       
-      // Remove broken image paragraph wrapping
-      processedText = processedText.replace(/<p>(<img[^>]*>)<\/p>/g, '$1');
+      Object.entries(imageCache).forEach(([placeholder, html]) => {
+        processedText = processedText.replace(placeholder, html);
+      });
+
+      // Clean up any errant paragraph wrapping around block elements
+      processedText = processedText
+        .replace(/<p>\s*(<h[1-6]|<pre|<blockquote|<img)/g, '$1')
+        .replace(/(<\/h[1-6]>|<\/pre>|<\/blockquote>|)\s*<\/p>/g, '$1');
 
       // Notify parent component about headings
       if (onHeadingsUpdate) {
@@ -129,7 +173,7 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
 
   return (
     <article 
-      className="prose max-w-none"
+      className="max-w-none"
       dangerouslySetInnerHTML={{ __html: `<div>${htmlContent}</div>` }} 
     />
   );

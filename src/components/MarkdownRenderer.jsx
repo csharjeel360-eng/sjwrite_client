@@ -9,16 +9,19 @@ export default function MarkdownRenderer({ content }) {
     
     return paragraphs.map((paragraph, index) => {
       if (paragraph.trim() === '') return null;
-      
-      // Check for headings
-      if (paragraph.startsWith('# ')) {
-        return <h1 key={index} className="text-3xl font-bold">{paragraph.substring(2)}</h1>;
+
+      // Trim leading/trailing whitespace so headings are detected even with leading spaces or CRLF
+      const trimmed = paragraph.trim();
+
+      // Check for headings (use trimmed content)
+      if (trimmed.startsWith('# ')) {
+        return <h1 key={index} className="text-3xl font-bold">{trimmed.substring(2)}</h1>;
       }
-      if (paragraph.startsWith('## ')) {
-        return <h2 key={index} className="text-2xl font-bold">{paragraph.substring(3)}</h2>;
+      if (trimmed.startsWith('## ')) {
+        return <h2 key={index} className="text-2xl font-bold">{trimmed.substring(3)}</h2>;
       }
-      if (paragraph.startsWith('### ')) {
-        return <h3 key={index} className="text-xl font-bold">{paragraph.substring(4)}</h3>;
+      if (trimmed.startsWith('### ')) {
+        return <h3 key={index} className="text-xl font-bold">{trimmed.substring(4)}</h3>;
       }
 
       // Process inline formatting within the paragraph

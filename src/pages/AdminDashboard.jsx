@@ -177,7 +177,7 @@ function RichTextEditor({ value, onChange, placeholder }) {
                 key={idx}
                 src={src} 
                 alt={alt || 'Image'} 
-                className="max-w-full h-auto rounded my-4 border object-cover"
+                style={{maxWidth: '100%', height: 'auto', borderRadius: '0.5rem', margin: '1rem 0', border: '1px solid #d1d5db', objectFit: 'cover'}}
                 onError={(e) => {
                   e.target.style.border = '2px solid red';
                   e.target.title = 'Image failed to load';
@@ -187,14 +187,15 @@ function RichTextEditor({ value, onChange, placeholder }) {
           }
           
           // Convert markdown to HTML for non-image content
+          // Process headings from most specific to least specific to avoid regex conflicts
           const html = part
-            .replace(/^### (.*$)/gim, '<h3 class="text-lg font-bold">$1</h3>')
-            .replace(/^## (.*$)/gim, '<h2 class="text-xl font-bold">$1</h2>')
-            .replace(/^# (.*$)/gim, '<h1 class="text-2xl font-bold">$1</h1>')
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            .replace(/\*(.*?)\*/g, '<em>$1</em>')
-            .replace(/_(.*?)_/g, '<em>$1</em>')
-            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" class="text-black hover:underline" target="_blank" rel="noopener noreferrer">$1</a>')
+            .replace(/^### (.*$)/gim, '<h3 style="font-size:1.125rem;font-weight:bold;margin-top:1rem;margin-bottom:0.5rem">$1</h3>')
+            .replace(/^## (.*$)/gim, '<h2 style="font-size:1.25rem;font-weight:bold;margin-top:1.25rem;margin-bottom:0.75rem">$1</h2>')
+            .replace(/^# (.*$)/gim, '<h1 style="font-size:1.625rem;font-weight:bold;margin-top:1.5rem;margin-bottom:1rem">$1</h1>')
+            .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight:bold">$1</strong>')
+            .replace(/\*(.*?)\*/g, '<em style="font-style:italic">$1</em>')
+            .replace(/_(.*?)_/g, '<em style="font-style:italic">$1</em>')
+            .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color:#000;text-decoration:underline" target="_blank" rel="noopener noreferrer">$1</a>')
             .replace(/\n/g, '<br />');
           
           return (
@@ -571,7 +572,7 @@ function DashboardInner() {
               </div>
               {form.blogImage && (
                 <div className="mt-2">
-                  <img src={form.blogImage} className="w-full h-48 object-cover rounded border" alt={form.blogImageAlt || form.title || 'Preview'} />
+                  <img src={form.blogImage} style={{width: '100%', height: '12rem', objectFit: 'cover', borderRadius: '0.375rem', border: '1px solid #d1d5db'}} alt={form.blogImageAlt || form.title || 'Preview'} />
                   <button
                     type="button"
                     onClick={() => setForm({ ...form, blogImage: '', blogImageAlt: '' })}
@@ -618,7 +619,7 @@ function DashboardInner() {
             {blogs.map(b => (
               <div key={b._id} className="bg-white rounded shadow p-4 flex flex-col md:flex-row md:items-start gap-4">
                 {b.blogImage && (
-                  <img src={b.blogImage} className="w-32 h-24 object-cover rounded" alt={b.blogImageAlt || b.title} />
+                  <img src={b.blogImage} style={{width: '8rem', height: '6rem', objectFit: 'cover', borderRadius: '0.375rem'}} alt={b.blogImageAlt || b.title} />
                 )}
                 <div className="flex-1">
                   <h3 className="font-bold text-lg mb-1">{b.title}</h3>
