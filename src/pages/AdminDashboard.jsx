@@ -392,7 +392,9 @@ function DashboardInner() {
     title: '', 
     content: '', 
     tags: '', 
-    blogImage: '' 
+    blogImage: '',
+    metaTitle: '',
+    metaDescription: ''
   });
   const [loading, setLoading] = useState(false);
 
@@ -426,6 +428,8 @@ function DashboardInner() {
       content: form.content,
       blogImage: form.blogImage || undefined,
       tags: tagsArray, // Use the properly formatted array
+      metaTitle: form.metaTitle.trim() || undefined,
+      metaDescription: form.metaDescription.trim() || undefined
     };
     
     try {
@@ -435,7 +439,7 @@ function DashboardInner() {
       } else {
         await api.createBlog(payload, token);
       }
-      setForm({ title: '', content: '', tags: '', blogImage: '' });
+      setForm({ title: '', content: '', tags: '', blogImage: '', metaTitle: '', metaDescription: '' });
       setEditing(null);
       await load();
     } catch (error) {
@@ -452,6 +456,8 @@ function DashboardInner() {
       content: b.content,
       tags: (b.tags || []).join(', '),
       blogImage: b.blogImage || '',
+      metaTitle: b.metaTitle || '',
+      metaDescription: b.metaDescription || ''
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -509,6 +515,37 @@ function DashboardInner() {
                 disabled={loading}
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Meta Title (SEO)
+              </label>
+              <input
+                className="w-full border rounded px-3 py-2"
+                placeholder="Enter meta title for search engines (50-60 characters)"
+                value={form.metaTitle}
+                onChange={e => setForm({ ...form, metaTitle: e.target.value })}
+                disabled={loading}
+                maxLength="60"
+              />
+              <p className="text-xs text-gray-500 mt-1">{form.metaTitle.length}/60 characters</p>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Meta Description (SEO)
+              </label>
+              <textarea
+                className="w-full border rounded px-3 py-2 resize-none"
+                placeholder="Enter meta description for search engines (150-160 characters)"
+                value={form.metaDescription}
+                onChange={e => setForm({ ...form, metaDescription: e.target.value })}
+                disabled={loading}
+                maxLength="160"
+                rows="3"
+              />
+              <p className="text-xs text-gray-500 mt-1">{form.metaDescription.length}/160 characters</p>
+            </div>
           </div>
           
           <div className="space-y-4">
@@ -547,7 +584,7 @@ function DashboardInner() {
             <button
               onClick={() => {
                 setEditing(null);
-                setForm({ title: '', content: '', tags: '', blogImage: '' });
+                setForm({ title: '', content: '', tags: '', blogImage: '', metaTitle: '', metaDescription: '' });
               }}
               disabled={loading}
               className="px-6 py-2 rounded bg-gray-300 hover:bg-gray-400 transition disabled:opacity-50"

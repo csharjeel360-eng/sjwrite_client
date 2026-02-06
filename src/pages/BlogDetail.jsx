@@ -753,13 +753,13 @@ export default function BlogDetail() {
         {/* 🟢 CRITICAL: Self-referencing canonical URL (CLEAN VERSION) */}
         <link rel="canonical" href={cleanUrl} />
         
-        {/* 🟢 Unique title and description */}
-        <title>{blog.title} - SJWrites</title>
-        <meta name="description" content={description} />
+        {/* 🟢 Unique title and description - Uses meta fields if set, otherwise falls back to auto-generated */}
+        <title>{blog.metaTitle ? `${blog.metaTitle} - SJWrites` : `${blog.title} - SJWrites`}</title>
+        <meta name="description" content={blog.metaDescription || description} />
         
         {/* 🟢 Open Graph tags (CRITICAL FOR IMAGE SHARING) */}
-        <meta property="og:title" content={blog.title} />
-        <meta property="og:description" content={description} />
+        <meta property="og:title" content={blog.metaTitle || blog.title} />
+        <meta property="og:description" content={blog.metaDescription || description} />
         <meta property="og:image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
@@ -772,8 +772,8 @@ export default function BlogDetail() {
         
         {/* 🟢 Twitter Card (CRITICAL FOR TWITTER SHARING) */}
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={blog.title} />
-        <meta name="twitter:description" content={description} />
+        <meta name="twitter:title" content={blog.metaTitle || blog.title} />
+        <meta name="twitter:description" content={blog.metaDescription || description} />
         <meta name="twitter:image" content={blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png'} />
         <meta name="twitter:image:alt" content={blog.title} />
         <meta name="twitter:site" content="@sjwrites" />
@@ -797,7 +797,7 @@ export default function BlogDetail() {
             "@context": "https://schema.org",
             "@type": "BlogPosting",
             "headline": blog.title,
-            "description": description,
+            "description": blog.metaDescription || description,
             "image": {
               "@type": "ImageObject",
               "url": blog.blogImage || blog.image || 'https://sjwrites.com/default-og-image.png',
