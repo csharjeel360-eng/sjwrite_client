@@ -533,6 +533,13 @@ export default function BlogDetail() {
     try {
       setLoading(true);
       const blogData = await api.getBlog(blogId);
+      
+      // 🔴 CRITICAL: Reject unpublished/deleted blogs
+      if (blogData.published === false) {
+        setBlog(null);
+        return;
+      }
+      
       setBlog(blogData);
       setHasLiked(checkIfLiked());
       setIsBookmarked(checkIfBookmarked());
@@ -556,6 +563,7 @@ export default function BlogDetail() {
       
     } catch (error) {
       console.error('Error loading blog:', error);
+      setBlog(null); // Treat errors as not found
     } finally {
       setLoading(false);
     }
@@ -600,8 +608,10 @@ export default function BlogDetail() {
       }
 
       // Filter, deduplicate and limit results
+      // 🔴 CRITICAL: Only show published blogs
       const filtered = related
         .filter(b => b._id !== resolvedId)
+        .filter(b => b.published !== false) // Exclude explicitly unpublished
         .filter((blog, index, self) => 
           index === self.findIndex(b => b._id === blog._id)
         )
@@ -615,6 +625,7 @@ export default function BlogDetail() {
         const allBlogs = await api.getBlogs();
         const filtered = allBlogs
           .filter(b => b._id !== resolvedId)
+          .filter(b => b.published !== false) // Exclude explicitly unpublished
           .slice(0, 6);
         setRelatedBlogs(filtered);
       } catch (fallbackError) {
@@ -639,9 +650,20 @@ export default function BlogDetail() {
       if (!slug) return;
       try {
         setLoading(true);
+        
+        // 🚀 OPTIMIZATION: This should use a dedicated API endpoint
+        // TODO: Add to api/client.js: api.getBlogBySlug(slug)
+        // For now, using getBlogs() - consider refactoring this when scale grows
         const all = await api.getBlogs();
-        const matched = all.find(b => generateSlug(b.title) === slug);
+        
+        // 🔴 CRITICAL: Filter for published blogs only to prevent indexing deleted content
+        const matched = all.find(b => 
+          generateSlug(b.title) === slug && 
+          (b.published !== false) // Include blogs without 'published' field (backward compat), but exclude explicitly unpublished
+        );
+        
         if (!matched) {
+          // Blog not found, unpublished, or deleted
           setBlog(null);
           return;
         }
@@ -660,6 +682,7 @@ export default function BlogDetail() {
         }
       } catch (error) {
         console.error('Error resolving blog by slug:', error);
+        setBlog(null); // Treat errors as not found
       } finally {
         setLoading(false);
       }
@@ -758,8 +781,11 @@ export default function BlogDetail() {
     return (
       <>
         <Helmet>
-          <title>Loading... - SJWrites</title>
-          <meta name="description" content="Loading blog post..." />
+          {/* 🔴 CRITICAL: Do NOT index loading states */}
+          {/* Helmet tags intentionally empty - let parent default <title> show temporarily */}
+          <meta name="robots" content="noindex, nofollow" />
+          {/* Clear any dynamic meta to prevent duplication */}
+          <meta name="description" content="" />
         </Helmet>
         <ReadingProgress />
         <div className="max-w-3xl mx-auto px-4 py-10">
@@ -778,12 +804,17 @@ export default function BlogDetail() {
     return (
       <>
         <Helmet>
-          <title>Blog Not Found - SJWrites</title>
+          {/* 🔴 CRITICAL: Block indexing of 404 pages - prevents Soft 404 penalties */}
+          <title>Page Not Found - SJWrites</title>
+          <meta name="robots" content="noindex, follow" />
           <meta name="description" content="The requested blog post could not be found." />
+          {/* Explicitly prevent canonical, OG, and schema for 404 pages */}
+          <link rel="canonical" href="" />
         </Helmet>
         <div className="max-w-3xl mx-auto px-4 py-10 text-center">
           <h2 className="text-2xl font-bold text-gray-800 mb-4">Blog post not found</h2>
-          <Link to="/" className="text-black hover:underline">
+          <p className="text-gray-600 mb-6">The blog post you're looking for doesn't exist or may have been removed.</p>
+          <Link to="/" className="text-black hover:underline font-medium">
             ← Back to homepage
           </Link>
         </div>
