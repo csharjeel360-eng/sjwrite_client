@@ -75,7 +75,7 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
       // First, extract and cache all images
       let processedText = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
         const placeholder = `XIMG${imageIndex}X`;
-        imageCache[placeholder] = `<img src="${src}" alt="${alt}" style="max-width:100%;height:auto;border-radius:0.5rem;margin-top:1rem;margin-bottom:1rem;border:1px solid #d1d5db;display:block;object-fit:cover" />`;
+        imageCache[placeholder] = `<img src="${src}" alt="${alt}" class="no-css-override" style="max-width:100%;height:auto;border-radius:0.5rem;margin-top:1.35rem;margin-bottom:0.0rem;border:1px solid #d1d5db;display:block;object-fit:cover" />`;
         imageIndex++;
         return placeholder;
       });
@@ -88,35 +88,40 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
         return placeholder;
       });
 
+        processedText = processedText.replace(
+        /(<\/h[1-3]>)\s*(<p)/g, 
+        '$1<p class="after-heading"'
+      );
       // Convert block-level elements (headings, blockquotes) first, preserving them from paragraph wrapping
       let blockCache = {};
       let blockIndex = 0;
 
       processedText = processedText
         .replace(/^\s*#\s+(.*$)/gim, (match, title) => {
-          const id = `heading-${headingIndex++}`;
-          headings.push({ id, title, level: 1 });
-          const placeholder = `XBLOCK${blockIndex}X`;
-          blockCache[placeholder] = `<h1 id="${id}" style="font-size:1.875rem;font-weight:bold;scroll-margin-top:5rem;margin-top:1.5rem;margin-bottom:1rem">${title}</h1>`;
-          blockIndex++;
-          return placeholder;
-        })
+  const id = `heading-${headingIndex++}`;
+  headings.push({ id, title, level: 1 });
+  const placeholder = `XBLOCK${blockIndex}X`;
+  blockCache[placeholder] = `<h1 id="${id}" class="no-css-override" style="font-size:1.875rem;font-weight:bold;scroll-margin-top:5rem;margin-top:0.5rem;margin-bottom:0.1rem;line-height:1.2">${title}</h1>`;
+  blockIndex++;
+  return placeholder;
+})
+        // In MarkdownRenderer, add a unique class
         .replace(/^\s*##\s+(.*$)/gim, (match, title) => {
           const id = `heading-${headingIndex++}`;
           headings.push({ id, title, level: 2 });
           const placeholder = `XBLOCK${blockIndex}X`;
-          blockCache[placeholder] = `<h2 id="${id}" style="font-size:1.5rem;font-weight:bold;scroll-margin-top:5rem;margin-top:1.25rem;margin-bottom:0.75rem">${title}</h2>`;
+          blockCache[placeholder] = `<h2 id="${id}" class="no-css-override" style="font-size:1.5rem;font-weight:bold;scroll-margin-top:5rem;margin-top:0.5rem;margin-bottom:0.1rem;line-height:1.2">${title}</h2>`;
           blockIndex++;
           return placeholder;
         })
         .replace(/^\s*###\s+(.*$)/gim, (match, title) => {
-          const id = `heading-${headingIndex++}`;
-          headings.push({ id, title, level: 3 });
-          const placeholder = `XBLOCK${blockIndex}X`;
-          blockCache[placeholder] = `<h3 id="${id}" style="font-size:1.125rem;font-weight:bold;scroll-margin-top:5rem;margin-top:1rem;margin-bottom:0.5rem">${title}</h3>`;
-          blockIndex++;
-          return placeholder;
-        })
+  const id = `heading-${headingIndex++}`;
+  headings.push({ id, title, level: 3 });
+  const placeholder = `XBLOCK${blockIndex}X`;
+  blockCache[placeholder] = `<h3 id="${id}" class="no-css-override" style="font-size:1.125rem;font-weight:bold;scroll-margin-top:5rem;margin-top:0.5rem;margin-bottom:0.1rem;line-height:1.2">${title}</h3>`;
+  blockIndex++;
+  return placeholder;
+})
         .replace(/^>\s*(.*$)/gim, (match, quote) => {
           const placeholder = `XBLOCK${blockIndex}X`;
           blockCache[placeholder] = `<blockquote style="border-left:4px solid #d1d5db;padding-left:1rem;padding-top:0.5rem;padding-bottom:0.5rem;margin-top:1rem;margin-bottom:1rem;background-color:#f9fafb;font-style:italic">${quote}</blockquote>`;
