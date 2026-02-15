@@ -6,11 +6,25 @@ import { Helmet } from 'react-helmet-async';
 export default function Blogs() {
   const [blogs, setBlogs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const SNAP_TTL = 10 * 60 * 1000; // 10 minutes
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
+        const snapshotKey = 'blogs_snapshot_v1';
+        let raw = null;
+        try { raw = sessionStorage.getItem(snapshotKey); } catch (e) { raw = null; }
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.fetchedAt && (Date.now() - parsed.fetchedAt) < SNAP_TTL) {
+              setBlogs(parsed.data || []);
+              setLoading(false);
+              return;
+            }
+          } catch (e) { /* ignore and refetch */ }
+        }
         // Try server-side query param first, then /tag/:tag, then fallback to client-side filtering
         let tagged = [];
         try {
@@ -46,6 +60,10 @@ export default function Blogs() {
         }
         console.log('Blogs.jsx: final tagged count =', (tagged || []).length);
         setBlogs(tagged || []);
+
+        try {
+          sessionStorage.setItem(snapshotKey, JSON.stringify({ fetchedAt: Date.now(), data: tagged || [] }));
+        } catch (e) { /* ignore */ }
       } catch (err) {
         console.error('Error loading blog-tagged posts:', err);
         setBlogs([]);

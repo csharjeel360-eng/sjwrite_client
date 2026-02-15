@@ -6,16 +6,39 @@ import { Helmet } from 'react-helmet-async';
 export default function HotBlogs() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const SNAP_TTL = 10 * 60 * 1000; // 10 minutes
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
+        
+        // Try restore from session snapshot first
+        const snapshotKey = 'hotblogs_snapshot_v1';
+        let raw = null;
+        try { raw = sessionStorage.getItem(snapshotKey); } catch (e) { raw = null; }
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.fetchedAt && (Date.now() - parsed.fetchedAt) < SNAP_TTL) {
+              setPosts(parsed.data || []);
+              setLoading(false);
+              return;
+            }
+          } catch (e) { /* ignore and refetch */ }
+        }
+
         // Fetch all posts then pick top by views (fallback for no backend hot endpoint)
         const all = await api.getBlogs();
         console.debug('HotBlogs: total posts fetched', (all || []).length);
         const sorted = (all || []).slice().sort((a, b) => (b.views || 0) - (a.views || 0));
-        setPosts(sorted.slice(0, 10));
+        const topPosts = sorted.slice(0, 10);
+        setPosts(topPosts);
+
+        // Save snapshot for quick restore when navigating back
+        try {
+          sessionStorage.setItem(snapshotKey, JSON.stringify({ fetchedAt: Date.now(), data: topPosts }));
+        } catch (e) { /* ignore */ }
       } catch (err) {
         console.error('Error loading hot posts:', err);
         setPosts([]);

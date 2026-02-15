@@ -1,4 +1,27 @@
- const API_BASE = import.meta.env.VITE_API_BASE || 'https://sjwrites-backend.vercel.app/api/';
+const API_BASE = import.meta.env.VITE_API_BASE || 'https://sjwrites-backend.vercel.app/api/';
+// Simple in-memory cache for API responses to avoid refetching on SPA navigation
+const _cache = new Map();
+const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+const getCached = (key) => {
+  const entry = _cache.get(key);
+  if (!entry) return null;
+  if (Date.now() - entry.t > CACHE_TTL_MS) {
+    _cache.delete(key);
+    return null;
+  }
+  return entry.v;
+};
+
+const setCached = (key, value) => {
+  _cache.set(key, { v: value, t: Date.now() });
+};
+
+const invalidateCache = (keyPrefix) => {
+  for (const k of _cache.keys()) {
+    if (k.startsWith(keyPrefix)) _cache.delete(k);
+  }
+};
 const jsonHeaders = (token) => ({
   'Content-Type': 'application/json',
   ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -56,13 +79,23 @@ export const api = {
   // Blogs (public)
   async getBlogs(tag = null) {
     const url = tag ? `${API_BASE}blogs?tag=${encodeURIComponent(tag)}` : `${API_BASE}blogs`;
+    const cacheKey = `blogs:${tag || 'all'}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
     const res = await fetchWithErrorLogging(url);
-    return handleResponse(res);
+    const data = await handleResponse(res);
+    setCached(cacheKey, data);
+    return data;
   },
 
   async getBlog(id) {
+    const cacheKey = `blog:${id}`;
+    const cached = getCached(cacheKey);
+    if (cached) return cached;
     const res = await fetchWithErrorLogging(`${API_BASE}blogs/${id}`);
-    return handleResponse(res);
+    const data = await handleResponse(res);
+    setCached(cacheKey, data);
+    return data;
   },
 
   async searchBlogs(q) {
@@ -122,7 +155,11 @@ export const api = {
       headers: jsonHeaders(token),
       body: JSON.stringify(payload),
     });
-    return handleResponse(res);
+    const data = await handleResponse(res);
+    // invalidate any cached entries for this blog
+    invalidateCache(`blog:${id}`);
+    invalidateCache('blogs:');
+    return data;
   },
 
   async deleteBlog(id, token) {
@@ -130,7 +167,10 @@ export const api = {
       method: 'DELETE',
       headers: jsonHeaders(token),
     });
-    return handleResponse(res);
+    const data = await handleResponse(res);
+    invalidateCache(`blog:${id}`);
+    invalidateCache('blogs:');
+    return data;
   },
 
   // Upload (admin protected)

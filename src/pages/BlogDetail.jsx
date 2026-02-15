@@ -72,10 +72,10 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
       const imageCache = {};
       let imageIndex = 0;
 
-      // First, extract and cache all images
+      // First, extract and cache all images (use CSS class + lazy loading)
       let processedText = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (match, alt, src) => {
         const placeholder = `XIMG${imageIndex}X`;
-        imageCache[placeholder] = `<img src="${src}" alt="${alt}" class="no-css-override" style="max-width:100%;height:auto;border-radius:0.5rem;margin-top:1.35rem;margin-bottom:0.0rem;border:1px solid #d1d5db;display:block;object-fit:cover" />`;
+        imageCache[placeholder] = `<img src="${src}" alt="${alt}" class="no-css-override markdown-body-img" loading="lazy" />`;
         imageIndex++;
         return placeholder;
       });
@@ -135,6 +135,7 @@ function MarkdownRenderer({ content, onHeadingsUpdate }) {
         .replace(/\*(.*?)\*/g, '<em style="font-style:italic">$1</em>')
         .replace(/_(.*?)_/g, '<em style="font-style:italic">$1</em>')
         .replace(/~~(.*?)~~/g, '<del style="text-decoration:line-through">$1</del>')
+        .replace(/\[(.*?)\]\((.*?)\)\{rel:(follow|nofollow|sponsored)\}/g, '<a href="$2" style="color:#000;text-decoration:underline" target="_blank" rel="$3 noopener noreferrer">$1</a>')
         .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color:#000;text-decoration:underline" target="_blank" rel="noopener noreferrer">$1</a>')
         .replace(/`([^`]+)`/g, '<code style="background-color:#f3f4f6;padding:0.125rem 0.375rem;border-radius:0.25rem;font-size:0.875rem;font-family:monospace;border:1px solid #d1d5db">$1</code>');
 
@@ -204,8 +205,8 @@ function ReadingProgress() {
   return (
     <div className="fixed top-0 left-0 w-full h-1 bg-gray-200 z-50">
       <div 
-        className="h-full bg-black transition-all duration-150"
-        style={{ width: `${progress}%` }}
+        className="h-full bg-black transition-transform duration-150 origin-left"
+        style={{ transform: `scaleX(${progress / 100})` }}
       />
     </div>
   );
@@ -311,9 +312,10 @@ function EnhancedShareModal({ blog, onClose, cleanUrl, description }) {
           <div className="mb-4 sm:mb-6 overflow-hidden rounded-lg border border-gray-200 bg-gradient-to-br from-gray-50 to-white">
             {blog.blogImage ? (
               <div className="relative">
-                <img 
-                  src={blog.blogImage} 
+                <img
+                  src={blog.blogImage}
                   alt={blog.title}
+                  loading="lazy"
                   className="w-full h-32 sm:h-48 object-cover"
                 />
                 <button
@@ -512,6 +514,9 @@ export default function BlogDetail() {
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [views, setViews] = useState(0);
 
+  // Snapshot TTL used for session restore
+  const SNAP_TTL = 10 * 60 * 1000; // 10 minutes
+
   // Define these at the top level to avoid hoisting issues
   const tags = blog ? getSafeTags(blog.tags) : [];
   const cleanUrl = blog ? `https://sjwrites.com/${generateSlug(blog.title)}` : '';
@@ -537,7 +542,24 @@ export default function BlogDetail() {
   const loadBlog = async () => {
     try {
       setLoading(true);
-      const blogData = await api.getBlog(blogId);
+      // Try to restore from session snapshot to avoid reloading when navigating back
+      const snapshotKey = `blog_snapshot:${blogId}`;
+      const SNAP_TTL = 10 * 60 * 1000; // 10 minutes
+      const raw = blogId ? sessionStorage.getItem(snapshotKey) : null;
+      let blogData = null;
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.fetchedAt && (Date.now() - parsed.fetchedAt) < SNAP_TTL) {
+            blogData = parsed.data;
+          }
+        } catch (e) {
+          console.warn('Invalid blog snapshot JSON', e);
+        }
+      }
+      if (!blogData) {
+        blogData = await api.getBlog(blogId);
+      }
       
       // 🔴 CRITICAL: Reject unpublished/deleted blogs
       if (blogData.published === false) {
@@ -550,11 +572,16 @@ export default function BlogDetail() {
       setIsBookmarked(checkIfBookmarked());
       
       // Track view
-      try {
-        await api.incrementView(blogId);
-        setViews(prev => (blogData.views || 0) + 1);
-      } catch (error) {
-        console.error('Error tracking view:', error);
+      // Track view only if we freshly loaded from network (no snapshot)
+      if (!raw) {
+        try {
+          await api.incrementView(blogId);
+          setViews(prev => (blogData.views || 0) + 1);
+        } catch (error) {
+          console.error('Error tracking view:', error);
+          setViews(blogData.views || 0);
+        }
+      } else {
         setViews(blogData.views || 0);
       }
       
@@ -563,7 +590,17 @@ export default function BlogDetail() {
       
       // Update URL to clean version (without ?id= parameter) and keep root-path slug
       if (searchParams.get('id')) {
+        // Replace the URL without causing a reload
         window.history.replaceState(null, '', `/${generateSlug(blogData.title)}`);
+      }
+
+      // Save a session snapshot so navigating back restores instantly
+      if (blogId) {
+        try {
+          sessionStorage.setItem(snapshotKey, JSON.stringify({ fetchedAt: Date.now(), data: blogData }));
+        } catch (e) {
+          console.warn('Failed to write blog snapshot', e);
+        }
       }
       
     } catch (error) {
@@ -659,10 +696,22 @@ export default function BlogDetail() {
         // 🚀 OPTIMIZATION: This should use a dedicated API endpoint
         // TODO: Add to api/client.js: api.getBlogBySlug(slug)
         // For now, using getBlogs() - consider refactoring this when scale grows
-        const all = await api.getBlogs();
+        // Try snapshot by slug first
+        const slugKey = `blog_snapshot_slug:${slug}`;
+        const rawSlug = sessionStorage.getItem(slugKey);
+        let matched = null;
+        if (rawSlug) {
+          try {
+            const parsed = JSON.parse(rawSlug);
+            if (parsed && parsed.fetchedAt && (Date.now() - parsed.fetchedAt) < SNAP_TTL) {
+              matched = parsed.data;
+            }
+          } catch (e) { /* ignore */ }
+        }
+        const all = matched ? [matched] : await api.getBlogs();
         
         // 🔴 CRITICAL: Filter for published blogs only to prevent indexing deleted content
-        const matched = all.find(b => 
+        matched = matched || all.find(b => 
           generateSlug(b.title) === slug && 
           (b.published !== false) // Include blogs without 'published' field (backward compat), but exclude explicitly unpublished
         );
@@ -678,13 +727,23 @@ export default function BlogDetail() {
         setIsBookmarked(checkIfBookmarked(matched._id));
 
         // Track view using resolved id but do NOT change the URL
-        try {
-          await api.incrementView(matched._id);
-          setViews(prev => (matched.views || 0) + 1);
-        } catch (error) {
-          console.error('Error tracking view by slug:', error);
+        // Track view using resolved id but do NOT change the URL
+        if (!rawSlug) {
+          try {
+            await api.incrementView(matched._id);
+            setViews(prev => (matched.views || 0) + 1);
+          } catch (error) {
+            console.error('Error tracking view by slug:', error);
+            setViews(matched.views || 0);
+          }
+        } else {
           setViews(matched.views || 0);
         }
+
+        // Save snapshot by slug
+        try {
+          sessionStorage.setItem(slugKey, JSON.stringify({ fetchedAt: Date.now(), data: matched }));
+        } catch (e) { /* ignore */ }
       } catch (error) {
         console.error('Error resolving blog by slug:', error);
         setBlog(null); // Treat errors as not found
@@ -886,12 +945,12 @@ export default function BlogDetail() {
               "name": blog.title,
               "description": blog.title
             },
-            "author": {
-              "@type": "Person",
-              "name": blog.author?.name || "Sharjeel",
-              "url": "https://sjwrites.com/about",
-              "image": profileImage
-            },
+                "author": {
+                  "@type": "Person",
+                  "name": blog.author?.name || "Sharjeel",
+                  "url": "https://sjwrites.com/about",
+                  "image": "https://sjwrites.com/assets/1.png"
+                },
             "publisher": {
               "@type": "Organization",
               "name": "SJWrites",
@@ -993,17 +1052,11 @@ export default function BlogDetail() {
             {/* Author, Date, and Share Info */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b">
               <div className="flex items-center gap-4">
-                <img 
-                  src={profileImage} 
-                  alt="SJWrites logo" 
-                  className="w-14 h-14 rounded-full object-cover border-2 border-gray-300 shadow-sm flex-shrink-0" 
-                  style={{ 
-                    imageRendering: 'auto',
-                    filter: 'none',
-                    WebkitFontSmoothing: 'antialiased',
-                    backfaceVisibility: 'hidden',
-                    transform: 'translate3d(0, 0, 0)'
-                  }}
+                <img
+                  src={profileImage}
+                  alt="Sharjeel — Author, SJWrites"
+                  loading="lazy"
+                  className="w-14 h-14 rounded-full object-cover border-2 border-gray-300 shadow-sm flex-shrink-0 antialiased transform-gpu"
                 />
                 <div>
                   <div className="font-medium text-gray-900">by Sharjeel</div>
@@ -1036,11 +1089,11 @@ export default function BlogDetail() {
             {/* Featured Image with alt text */}
             {blog.blogImage && (
               <div className="relative overflow-hidden rounded-xl mb-8 shadow-lg">
-                <img 
-                  src={blog.blogImage} 
+                <img
+                  src={blog.blogImage}
                   alt={`${blog.title} - Featured image`}
                   className="w-full h-auto object-cover"
-                  loading="eager"
+                  loading="lazy"
                   width="1200"
                   height="675"
                 />
@@ -1049,13 +1102,14 @@ export default function BlogDetail() {
                 {tags.length > 0 && (
                   <div className="absolute bottom-4 left-4 right-4 flex flex-wrap gap-2">
                     {tags.slice(0, 4).map((tag, index) => (
-                      <span
+                      <Link
                         key={index}
+                        to={`/tag/${generateSlug(tag)}`}
                         className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/80 text-white backdrop-blur-sm"
-                        aria-hidden="true"
+                        aria-label={`View posts tagged ${tag}`}
                       >
                         #{tag}
-                      </span>
+                      </Link>
                     ))}
                     {tags.length > 4 && (
                       <span className="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-medium bg-black/80 text-white backdrop-blur-sm">
@@ -1080,13 +1134,14 @@ export default function BlogDetail() {
               <div className="mb-10 pt-8 border-t">
                 <div className="flex flex-wrap gap-2">
                   {tags.map((tag, index) => (
-                    <span
+                    <Link
                       key={index}
+                      to={`/tag/${generateSlug(tag)}`}
                       className="inline-flex items-center px-4 py-2 rounded-lg text-sm bg-gray-100 text-gray-700"
-                      aria-hidden="true"
+                      aria-label={`View posts tagged ${tag}`}
                     >
                       #{tag}
-                    </span>
+                    </Link>
                   ))}
                 </div>
               </div>
@@ -1146,12 +1201,8 @@ export default function BlogDetail() {
                   <img
                     src={profileImage}
                     alt="Sharjeel - Author of SJWrites"
-                    className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg"
-                    style={{ 
-                      imageRendering: 'crisp-edges',
-                      WebkitFontSmoothing: 'antialiased',
-                      backfaceVisibility: 'hidden'
-                    }}
+                    loading="lazy"
+                    className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-lg antialiased transform-gpu"
                   />
                 </div>
                 <div className="flex-1 text-center md:text-left">

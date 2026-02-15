@@ -7,6 +7,7 @@ import ImageUploader from '../components/ImageUploader';
 function RichTextEditor({ value, onChange, placeholder }) {
   const [linkUrl, setLinkUrl] = useState('');
   const [linkText, setLinkText] = useState('');
+  const [linkType, setLinkType] = useState('follow'); // 'follow', 'nofollow', 'sponsored'
   const [showLinkInput, setShowLinkInput] = useState(false);
   const [showImageInput, setShowImageInput] = useState(false);
   const [imageUrl, setImageUrl] = useState('');
@@ -135,12 +136,14 @@ function RichTextEditor({ value, onChange, placeholder }) {
       case 'applyLink':
         if (linkUrl) {
           const displayText = linkText || 'Link';
-          newText = value.substring(0, start) + `[${displayText}](${linkUrl})` + value.substring(end);
-          newSelectionStart = start + displayText.length + linkUrl.length + 4;
+          const relAttr = linkType !== 'follow' ? `{rel:${linkType}}` : '';
+          newText = value.substring(0, start) + `[${displayText}](${linkUrl})${relAttr}` + value.substring(end);
+          newSelectionStart = start + displayText.length + linkUrl.length + 4 + relAttr.length;
           newSelectionEnd = newSelectionStart;
           setShowLinkInput(false);
           setLinkUrl('');
           setLinkText('');
+          setLinkType('follow');
         }
         break;
       default:
@@ -195,6 +198,7 @@ function RichTextEditor({ value, onChange, placeholder }) {
             .replace(/\*\*(.*?)\*\*/g, '<strong style="font-weight:bold">$1</strong>')
             .replace(/\*(.*?)\*/g, '<em style="font-style:italic">$1</em>')
             .replace(/_(.*?)_/g, '<em style="font-style:italic">$1</em>')
+            .replace(/\[(.*?)\]\((.*?)\)\{rel:(follow|nofollow|sponsored)\}/g, '<a href="$2" style="color:#000;text-decoration:underline" target="_blank" rel="$3 noopener noreferrer">$1</a>')
             .replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2" style="color:#000;text-decoration:underline" target="_blank" rel="noopener noreferrer">$1</a>')
             .replace(/\n/g, '<br />');
           
@@ -280,6 +284,17 @@ function RichTextEditor({ value, onChange, placeholder }) {
             />
           </div>
           <div className="flex gap-2">
+            <select
+              value={linkType}
+              onChange={(e) => setLinkType(e.target.value)}
+              className="flex-1 px-2 py-1 border rounded text-sm"
+            >
+              <option value="follow">Follow (default)</option>
+              <option value="nofollow">No Follow</option>
+              <option value="sponsored">Sponsored</option>
+            </select>
+          </div>
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={() => applyFormat('applyLink')}
@@ -294,6 +309,7 @@ function RichTextEditor({ value, onChange, placeholder }) {
                 setShowLinkInput(false);
                 setLinkUrl('');
                 setLinkText('');
+                setLinkType('follow');
               }}
               className="px-2 py-1 bg-gray-300 rounded text-sm"
             >

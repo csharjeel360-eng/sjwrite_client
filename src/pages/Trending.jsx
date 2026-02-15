@@ -6,11 +6,28 @@ import { Helmet } from 'react-helmet-async';
 export default function Trending() {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const SNAP_TTL = 10 * 60 * 1000; // 10 minutes
 
   useEffect(() => {
     const load = async () => {
       try {
         setLoading(true);
+        
+        // Try restore from session snapshot first
+        const snapshotKey = 'trending_snapshot_v1';
+        let raw = null;
+        try { raw = sessionStorage.getItem(snapshotKey); } catch (e) { raw = null; }
+        if (raw) {
+          try {
+            const parsed = JSON.parse(raw);
+            if (parsed && parsed.fetchedAt && (Date.now() - parsed.fetchedAt) < SNAP_TTL) {
+              setPosts(parsed.data || []);
+              setLoading(false);
+              return;
+            }
+          } catch (e) { /* ignore and refetch */ }
+        }
+
         // Try getBlogs?tag= first, then /tag/:tag, then client-side fallback
         let tagged = [];
         try {
@@ -46,6 +63,11 @@ export default function Trending() {
         (tagged || []).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
         console.log('Trending.jsx: final tagged count =', (tagged || []).length);
         setPosts(tagged || []);
+
+        // Save snapshot for quick restore when navigating back
+        try {
+          sessionStorage.setItem(snapshotKey, JSON.stringify({ fetchedAt: Date.now(), data: tagged || [] }));
+        } catch (e) { /* ignore */ }
       } catch (err) {
         console.error('Error loading trending posts:', err);
         setPosts([]);

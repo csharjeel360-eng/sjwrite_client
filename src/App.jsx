@@ -1,5 +1,7 @@
-import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, Navigate, useParams, useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
+import DeferredScript from './components/DeferredScript';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
@@ -62,6 +64,7 @@ function BlogIdRedirect() {
   const { id } = useParams();
   const [blog, setBlog] = useState(null);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchBlogAndRedirect = async () => {
@@ -69,12 +72,16 @@ function BlogIdRedirect() {
         const blogData = await api.getBlog(id);
         setBlog(blogData);
         const slug = generateSlug(blogData.title);
-        // Replace the current URL with the new slug-based URL (root path)
-        window.location.replace(`/${slug}?id=${id}`);
+        // Navigate to the new slug-based URL without a full page reload
+        const target = `/${slug}?id=${id}`;
+        // Only navigate if we're not already at the intended URL
+        if (window.location.pathname !== `/${slug}` || window.location.search.indexOf(`id=${id}`) === -1) {
+          navigate(target, { replace: true });
+        }
       } catch (error) {
         console.error('Error fetching blog for redirect:', error);
         // If error, redirect to blogs page
-        window.location.replace('/blogs');
+        navigate('/blogs', { replace: true });
       } finally {
         setLoading(false);
       }
@@ -105,6 +112,7 @@ function BlogIdRedirect() {
 export default function App() {
   return (
     <Router>
+      <MetaDefaults />
       <ScrollToTop />
       <Navbar />
       <Routes>
@@ -211,6 +219,31 @@ export default function App() {
         <Route path="*" element={<Navigate to="/" />} />
       </Routes>
       <Footer />
+      {/* Deferred third-party scripts: load after idle/interaction to reduce TBT */}
+      <DeferredScript
+        src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5685971541362154"
+        id="adsbygoogle"
+        strategy="idle"
+        attrs={{ crossorigin: 'anonymous' }}
+      />
+      <DeferredScript
+        src="https://www.googletagmanager.com/gtm.js?id=GTM-TQCV2FSF"
+        id="gtm-script"
+        strategy="idle"
+      />
     </Router>
+  );
+}
+
+function MetaDefaults() {
+  const { pathname } = useLocation();
+  const canonical = `https://sjwrites.com${pathname}`;
+
+  return (
+    <Helmet>
+      <meta name="description" content="SJWrites — entertainment, trending stories, celebrity news and more. Read the latest articles." />
+      <link rel="canonical" href={canonical} />
+      <meta name="robots" content="index,follow" />
+    </Helmet>
   );
 }

@@ -61,6 +61,20 @@
   object-fit: cover;
 }
 
+  /* Class used by the Markdown renderer to keep inline styles out of HTML
+     and enable lazy loading and consistent styling via CSS. */
+  .markdown-body-img,
+  .no-css-override {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin-top: 1.35rem;
+    margin-bottom: 0;
+    border-radius: 0.5rem;
+    border: 1px solid #d1d5db;
+    object-fit: cover;
+  }
+
 .markdown-content strong {
   font-weight: bold;
 }

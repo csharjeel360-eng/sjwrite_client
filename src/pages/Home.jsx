@@ -38,23 +38,45 @@ export default function Home() {
   const postsPerPage = 50;
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const SNAP_TTL = 10 * 60 * 1000; // 10 minutes
 
   useEffect(() => {
     const loadPosts = async () => {
+      const snapshotKey = 'home_snapshot_v1';
+      let raw = null;
+      try { raw = sessionStorage.getItem(snapshotKey); } catch (e) { raw = null; }
+      if (raw) {
+        try {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.fetchedAt && (Date.now() - parsed.fetchedAt) < SNAP_TTL) {
+            setAllPosts(parsed.data.allPosts || []);
+            setFeaturedPost(parsed.data.featuredPost || null);
+            setLatestPosts(parsed.data.latestPosts || []);
+            setLoading(false);
+            return;
+          }
+        } catch (e) { /* ignore and refetch */ }
+      }
+
       try {
         const posts = await api.getBlogs();
         setAllPosts(posts);
-        
+
         // Get most recent post for featured
         const sortedByDate = [...posts].sort((a, b) => 
           new Date(b.createdAt) - new Date(a.createdAt)
         );
-        
+
         if (sortedByDate.length > 0) {
           setFeaturedPost(sortedByDate[0]);
           setLatestPosts(sortedByDate.slice(1, 3)); // Next 2 posts for side
         }
-        
+
+        // Save snapshot for quick restore when navigating back
+        try {
+          sessionStorage.setItem(snapshotKey, JSON.stringify({ fetchedAt: Date.now(), data: { allPosts: posts, featuredPost: sortedByDate[0] || null, latestPosts: sortedByDate.slice(1,3) } }));
+        } catch (e) { /* ignore */ }
+
       } catch (error) {
         console.error('Error loading posts:', error);
       } finally {
