@@ -23,7 +23,10 @@ const markdownToPlainText = (markdown) => {
     .replace(/\*\*(.*?)\*\*/g, '$1') // Remove bold
     .replace(/_(.*?)_/g, '$1') // Remove italic
     .replace(/#{1,6}\s?(.*?)(\n|$)/g, '$1') // Remove headers
-    .replace(/\[(.*?)\]\(.*?\)/g, '$1') // Remove link markup
+    // Remove link markup and optional {rel:...} attributes (e.g. [text](url){rel:nofollow})
+    .replace(/\[(.*?)\]\(.*?\)(?:\{rel:[^}]+\})?/g, '$1')
+    // Strip any stray {rel:...} tokens that might remain
+    .replace(/\{rel:[^}]+\}/g, '')
     .replace(/\n/g, ' ') // Replace newlines with spaces
     .replace(/\s+/g, ' ') // Collapse multiple spaces
     .trim();

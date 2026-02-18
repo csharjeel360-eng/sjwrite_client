@@ -25,13 +25,17 @@ const BlogCard = ({ blog, size = 'normal', showExcerpt = false, cleanUrl = false
       .replace(/\*\*(.*?)\*\*/g, '$1')
       .replace(/_(.*?)_/g, '$1')
       .replace(/#{1,6}\s?(.*?)(\n|$)/g, '$1')
-      .replace(/\[(.*?)\]\(.*?\)/g, '$1')
+      // Remove markdown links and optional {rel:...} attributes (e.g. [text](url){rel:nofollow})
+      .replace(/\[(.*?)\]\(.*?\)(?:\{rel:[^}]+\})?/g, '$1')
+      // Also strip any stray {rel:...} that might remain
+      .replace(/\{rel:[^}]+\}/g, '')
       .replace(/\n/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();
   };
 
-  const excerpt = blog.excerpt || markdownToPlainText(blog.content).substring(0, 150);
+  // Always sanitize excerpt (whether provided by backend or generated from content)
+  const excerpt = markdownToPlainText(blog.excerpt || blog.content).substring(0, 150);
 
   return (
     <article className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
